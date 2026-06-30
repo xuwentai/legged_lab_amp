@@ -1,6 +1,5 @@
 import gymnasium as gym
 
-from legged_lab.envs import ManagerBasedAmpEnv
 
 from . import agents
 

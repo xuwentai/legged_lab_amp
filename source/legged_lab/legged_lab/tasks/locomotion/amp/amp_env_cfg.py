@@ -2,7 +2,6 @@ import math
 from dataclasses import MISSING
 
 import isaaclab.sim as sim_utils
-from isaaclab_physx.physics import PhysxCfg
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
@@ -398,6 +397,8 @@ class LocomotionAmpEnvCfg(ManagerBasedAmpEnvCfg):
         self.sim.dt = 0.005
         self.sim.render_interval = self.decimation
         self.sim.physics_material = self.scene.terrain.physics_material
+        from isaaclab_physx.physics import PhysxCfg  # lazy: defer pxr load until after SimulationApp starts
+
         self.sim.physics = PhysxCfg(gpu_max_rigid_patch_count=10 * 2**15)
         # update sensor update periods
         # we tick all the sensors based on the smallest update period (physics update period)
