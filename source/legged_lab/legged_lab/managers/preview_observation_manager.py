@@ -55,8 +55,8 @@ class PreviewObservationManager(ObservationManager):
                 )
                 if circular_buffer._buffer is not None:
                     preview_buffer._buffer = circular_buffer._buffer.clone()
-                    preview_buffer._pointer = circular_buffer._pointer
                     preview_buffer._num_pushes = circular_buffer._num_pushes.clone()
+                    # Note: v3 CircularBuffer removed _pointer; _num_pushes is the sole write-position tracker.
                 preview_buffer.append(obs)
                 if term_cfg.flatten_history_dim:
                     group_obs[term_name] = preview_buffer.buffer.reshape(self._env.num_envs, -1)

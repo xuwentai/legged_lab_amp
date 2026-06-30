@@ -6,7 +6,7 @@ Reference: https://github.com/unitreerobotics/unitree_rl_lab
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets.articulation import ArticulationCfg
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 from legged_lab import LEGGED_LAB_ROOT_DIR
 from legged_lab.assets import unitree_actuators

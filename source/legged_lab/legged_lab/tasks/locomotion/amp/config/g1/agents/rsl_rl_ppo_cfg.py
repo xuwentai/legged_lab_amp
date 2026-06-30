@@ -1,5 +1,5 @@
-from isaaclab.utils import configclass
-from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlSymmetryCfg
+from isaaclab.utils.configclass import configclass
+from isaaclab_rl.rsl_rl import RslRlMLPModelCfg, RslRlOnPolicyRunnerCfg, RslRlSymmetryCfg
 
 from legged_lab.rsl_rl import RslRlAmpCfg, RslRlPpoAmpAlgorithmCfg
 from legged_lab.tasks.locomotion.amp.mdp.symmetry import g1
@@ -7,38 +7,39 @@ from legged_lab.tasks.locomotion.amp.mdp.symmetry import g1
 
 @configclass
 class G1RslRlOnPolicyRunnerAmpCfg(RslRlOnPolicyRunnerCfg):
-    class_name = "AMPRunner"
+    # Use stock OnPolicyRunner — PPOAMP is selected by algorithm.class_name below.
+    class_name = "OnPolicyRunner"
+
     num_steps_per_env = 24
     max_iterations = 50000
     save_interval = 200
     experiment_name = "g1_amp"
+
+    # Map algo-level obs-set names → env obs-group names.
+    # "discriminator" and "discriminator_demonstration" are consumed by PPOAMP directly.
     obs_groups = {
-        "policy": ["policy"],
+        "actor": ["policy"],
         "critic": ["critic"],
         "discriminator": ["disc"],
         "discriminator_demonstration": ["disc_demo"],
     }
-    # policy = RslRlPpoActorCriticRecurrentCfg(
-    #     init_noise_std=1.0,
-    #     actor_hidden_dims=[512, 256, 128],
-    #     critic_hidden_dims=[512, 256, 128],
-    #     actor_obs_normalization=False,
-    #     critic_obs_normalization=False,
-    #     activation="elu",
-    #     rnn_type="lstm",
-    #     rnn_hidden_dim=64,
-    #     rnn_num_layers=1
-    # )
-    policy = RslRlPpoActorCriticCfg(
-        init_noise_std=1.0,
-        actor_hidden_dims=[512, 256, 128],
-        critic_hidden_dims=[512, 256, 128],
-        actor_obs_normalization=False,
-        critic_obs_normalization=False,
+
+    # Modular actor (stochastic) and critic (deterministic) — v3 / rsl-rl 5.x style.
+    actor = RslRlMLPModelCfg(
+        hidden_dims=[512, 256, 128],
         activation="elu",
+        obs_normalization=False,
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
     )
+    critic = RslRlMLPModelCfg(
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=False,
+    )
+
     algorithm = RslRlPpoAmpAlgorithmCfg(
-        class_name="PPOAMP",
+        # Resolved by resolve_callable → legged_lab.rsl_rl.amp.ppo_amp.PPOAMP
+        class_name="legged_lab.rsl_rl.amp.ppo_amp:PPOAMP",
         value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
@@ -52,14 +53,16 @@ class G1RslRlOnPolicyRunnerAmpCfg(RslRlOnPolicyRunnerCfg):
         desired_kl=0.01,
         max_grad_norm=1.0,
         amp_cfg=RslRlAmpCfg(
-            disc_obs_buffer_size=100,
-            grad_penalty_scale=10.0,
+            grad_penalty_scale=40.0,          # tuned (was 10)
             disc_trunk_weight_decay=1.0e-4,
-            disc_linear_weight_decay=1.0e-2,
-            disc_learning_rate=1.0e-4,
+            disc_linear_weight_decay=1.0e-1,  # tuned (was 1e-2)
+            disc_learning_rate=1.0e-5,        # tuned (was 1e-4)
             disc_max_grad_norm=1.0,
             amp_discriminator=RslRlAmpCfg.AMPDiscriminatorCfg(
-                hidden_dims=[1024, 512], activation="elu", style_reward_scale=5.0, task_style_lerp=0.3
+                hidden_dims=[1024, 512],
+                activation="elu",
+                style_reward_scale=2.0,       # tuned (was 5)
+                task_style_lerp=0.5,          # tuned (was 0.3)
             ),
             loss_type="LSGAN",
         ),

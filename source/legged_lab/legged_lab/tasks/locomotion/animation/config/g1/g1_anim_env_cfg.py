@@ -1,7 +1,7 @@
 import os
 
 import isaaclab.sim as sim_utils
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 from legged_lab import LEGGED_LAB_ROOT_DIR
 

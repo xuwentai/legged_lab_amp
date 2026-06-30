@@ -3,7 +3,7 @@ import os
 
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab import LEGGED_LAB_ROOT_DIR
@@ -53,14 +53,18 @@ class G1AmpRewards:
     )
 
     joint_deviation_hip = RewTerm(
-        func=mdp.joint_deviation_l1,
+        func=mdp.stand_still_joint_deviation_l1,
         weight=-0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint"])},
+        params={
+            "command_name": "base_velocity",
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint"]),
+        },
     )
     joint_deviation_arms = RewTerm(
-        func=mdp.joint_deviation_l1,
+        func=mdp.stand_still_joint_deviation_l1,
         weight=-0.05,
         params={
+            "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg(
                 "robot",
                 joint_names=[
@@ -68,13 +72,16 @@ class G1AmpRewards:
                     ".*_elbow_joint",
                     ".*_wrist_.*_joint",
                 ],
-            )
+            ),
         },
     )
     joint_deviation_waist = RewTerm(
-        func=mdp.joint_deviation_l1,
+        func=mdp.stand_still_joint_deviation_l1,
         weight=-0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names="waist_.*_joint")},
+        params={
+            "command_name": "base_velocity",
+            "asset_cfg": SceneEntityCfg("robot", joint_names="waist_.*_joint"),
+        },
     )
 
     feet_air_time = RewTerm(

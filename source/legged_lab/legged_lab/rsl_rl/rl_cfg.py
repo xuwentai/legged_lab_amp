@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 from isaaclab_rl.rsl_rl import RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
 
 from .amp_cfg import RslRlAmpCfg
@@ -35,10 +35,14 @@ class RslRlPpoActorCriticConv2dCfg(RslRlPpoActorCriticCfg):
 
 @configclass
 class RslRlPpoAmpAlgorithmCfg(RslRlPpoAlgorithmCfg):
-    """Configuration for the AMP algorithm."""
+    """Configuration for the AMP algorithm.
 
-    class_name: str = "PPOAMP"
-    """The algorithm class name. Default is PPOAMP."""
+    The default class_name resolves to ``legged_lab.rsl_rl.amp.ppo_amp.PPOAMP`` via
+    ``rsl_rl.utils.resolve_callable`` — no fork of rsl_rl is required.
+    """
+
+    class_name: str = "legged_lab.rsl_rl.amp.ppo_amp:PPOAMP"
+    """The algorithm class name resolved by resolve_callable. Default is the external PPOAMP."""
 
     amp_cfg: RslRlAmpCfg = RslRlAmpCfg()
     """Configuration for the AMP (Adversarial Motion Priors) in the training."""

@@ -96,8 +96,10 @@ class MotionDataTerm(ManagerTermBase):
             # root position in world frame, shape (num_frames, 3)
             root_pos_w = torch.from_numpy(motion_raw_data["root_pos"]).to(self.device).float()
             root_pos_w.requires_grad_(False)
-            # root rotation (quaternion) from world frame to body frame, shape (num_frames, 4), in (w, x, y, z) format
+            # root rotation (quaternion) from world frame to body frame, shape (num_frames, 4)
+            # .pkl files store in (w, x, y, z) / WXYZ format; v3 isaaclab uses XYZW — convert here.
             root_quat = torch.from_numpy(motion_raw_data["root_rot"]).to(self.device).float()
+            root_quat = root_quat[..., [1, 2, 3, 0]]  # WXYZ → XYZW (v3 convention)
             root_quat.requires_grad_(False)
 
             # root velocity in world frame, shape (num_frames, 3)

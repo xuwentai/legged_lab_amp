@@ -1,4 +1,4 @@
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 from .manager_based_animation_env_cfg import ManagerBasedAnimationEnvCfg
 
