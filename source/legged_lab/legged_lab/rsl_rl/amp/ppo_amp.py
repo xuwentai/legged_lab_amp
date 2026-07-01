@@ -122,6 +122,7 @@ class PPOAMP(PPO):
         ]
         self.disc_optimizer = optim.Adam(disc_params, lr=amp_cfg.get("disc_learning_rate", 1e-5))
         self.disc_max_grad_norm = amp_cfg.get("disc_max_grad_norm", 0.5)
+        self.disc_update_interval = amp_cfg.get("disc_update_interval", 1)
 
         # AMP replay buffers (pre-built by construct_algorithm)
         self.disc_obs_buffer = disc_obs_buffer
@@ -260,6 +261,7 @@ class PPOAMP(PPO):
         mean_disc_grad_penalty = 0.0
         mean_disc_score = 0.0
         mean_disc_demo_score = 0.0
+        disc_updates_done = 0
 
         num_steps = self.storage.num_transitions_per_env  # type: ignore
         disc_obs_gen = self.disc_obs_buffer.mini_batch_generator(
@@ -273,7 +275,9 @@ class PPOAMP(PPO):
             num_epochs=self.num_learning_epochs,
         )
 
-        for disc_obs_batch, disc_demo_obs_batch in zip(disc_obs_gen, disc_demo_obs_gen):
+        for mini_batch_idx, (disc_obs_batch, disc_demo_obs_batch) in enumerate(
+            zip(disc_obs_gen, disc_demo_obs_gen)
+        ):
             # disc_obs_batch: (mini_batch_size, disc_obs_steps, disc_obs_dim)
             with torch.no_grad():
                 normed_agent = self.amp_discriminator.normalize_disc_obs(disc_obs_batch)
@@ -309,28 +313,41 @@ class PPOAMP(PPO):
             )
             total_disc_loss = disc_loss + grad_penalty
 
-            self.disc_optimizer.zero_grad()
-            total_disc_loss.backward()
-            nn.utils.clip_grad_norm_(
-                self.amp_discriminator.parameters(), self.disc_max_grad_norm
-            )
-            self.disc_optimizer.step()
+            # Only step the discriminator every disc_update_interval mini-batches.
+            # This slows the discriminator relative to the policy, preventing early saturation.
+            do_disc_update = mini_batch_idx % self.disc_update_interval == 0
 
-            # Update observation normaliser with un-normalised data
-            self.amp_discriminator.update_normalization(disc_obs_batch)
+            if do_disc_update:
+                self.disc_optimizer.zero_grad()
+                total_disc_loss.backward()
+                nn.utils.clip_grad_norm_(
+                    self.amp_discriminator.parameters(), self.disc_max_grad_norm
+                )
+                self.disc_optimizer.step()
+                # Update observation normaliser with un-normalised data
+                self.amp_discriminator.update_normalization(disc_obs_batch)
 
-            mean_disc_loss += disc_loss.item()
-            mean_disc_grad_penalty += grad_penalty.item()
+            # scores logged every step (saturation tracking); losses only on update steps
             mean_disc_score += disc_score.mean().item()
             mean_disc_demo_score += disc_demo_score.mean().item()
+            if do_disc_update:
+                mean_disc_loss += disc_loss.item()
+                mean_disc_grad_penalty += grad_penalty.item()
+                disc_updates_done += 1
 
         num_updates = self.num_learning_epochs * self.num_mini_batches
-        return {
-            "amp/disc_loss": mean_disc_loss / num_updates,
-            "amp/disc_grad_penalty": mean_disc_grad_penalty / num_updates,
+        # disc scores accumulated every step; losses only on actual update steps
+        result = {
             "amp/disc_score": mean_disc_score / num_updates,
             "amp/disc_demo_score": mean_disc_demo_score / num_updates,
         }
+        if disc_updates_done > 0:
+            result["amp/disc_loss"] = mean_disc_loss / disc_updates_done
+            result["amp/disc_grad_penalty"] = mean_disc_grad_penalty / disc_updates_done
+        else:
+            result["amp/disc_loss"] = 0.0
+            result["amp/disc_grad_penalty"] = 0.0
+        return result
 
     # ------------------------------------------------------------------
     # Train / eval mode

@@ -58,6 +58,7 @@ class G1RslRlOnPolicyRunnerAmpCfg(RslRlOnPolicyRunnerCfg):
             disc_linear_weight_decay=1.0e-1,  # tuned (was 1e-2)
             disc_learning_rate=1.0e-5,        # tuned (was 1e-4)
             disc_max_grad_norm=1.0,
+            disc_update_interval=5,           # update disc once every 5 PPO mini-batches
             amp_discriminator=RslRlAmpCfg.AMPDiscriminatorCfg(
                 hidden_dims=[1024, 512],
                 activation="elu",
