@@ -13,7 +13,7 @@ from isaaclab.utils.configclass import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 
 import legged_lab.tasks.locomotion.animation.mdp as mdp
-from legged_lab.envs import ManagerBasedAnimationEnvCfg
+from legged_lab.envs.manager_based_animation_env_cfg import ManagerBasedAnimationEnvCfg
 from legged_lab.managers import AnimationTermCfg as AnimTerm
 from legged_lab.managers import MotionDataTermCfg as MotionDataTerm
 

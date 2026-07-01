@@ -17,7 +17,7 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import UniformNoiseCfg as Unoise
 
 import legged_lab.tasks.locomotion.amp.mdp as mdp
-from legged_lab.envs import ManagerBasedAmpEnvCfg
+from legged_lab.envs.manager_based_amp_env_cfg import ManagerBasedAmpEnvCfg
 from legged_lab.managers import AnimationTermCfg as AnimTerm
 from legged_lab.managers import MotionDataTermCfg as MotionDataTerm
 
