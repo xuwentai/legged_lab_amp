@@ -8,11 +8,27 @@
 
 - [x] **Phase 0** — worktree + 落盘计划 + 环境自检
 - [x] **Phase 1** — 项目脚手架对齐 v3
-- [x] **Phase 2** — 环境层 v3 破坏性 API 迁移（代码层面完成；velocity 冒烟运行待手动验证）
+- [x] **Phase 2** — 环境层 v3 破坏性 API 迁移（✅ velocity 冒烟已跑通）
 - [x] **Phase 3** — AMP env 层迁移到 v3
 - [x] **Phase 4** — AMP 外部算法模块（对齐 rsl_rl 5.4.1）
 - [x] **Phase 5** — AMP config 接线（class_name 指向外部模块）
-- [x] **Phase 6** — 退役 fork（代码层面完成；端到端运行验证待手动执行）
+- [x] **Phase 6** — 退役 fork（✅ AMP 训练 + play 回放已跑通）
+
+## ✅ 冒烟测试结果（2026-07-01，lab3-beta2 env）
+
+- **velocity** (`LeggedLab-Isaac-Velocity-Flat-Unitree-G1-v0`)：5 iter 跑通，9 秒完成。actor/critic 模块化 MLPModel 正确构建，obs_groups resolved。
+- **AMP** (`LeggedLab-Isaac-AMP-G1-v0`)：50 iter 跑通，84 秒完成。PPOAMP 外部算法经 `resolve_callable` 加载成功；判别器正确工作：disc_score≈-0.6（agent），disc_demo_score≈+0.6（demo），disc_loss≈0.23-0.27，grad_penalty≈0.10-0.13。29 个 motion clip 全部加载。
+- **AMP play** (`LeggedLab-Isaac-AMP-G1-Play-v0`)：checkpoint（含 amp_discriminator_state_dict / normalizer / optimizer 三键）加载成功，policy.pt + policy.onnx 导出成功，推理循环无报错。
+
+**运行命令（供复现）：**
+```bash
+source /mnt/dolphinfs/.../lab3-beta2/bin/activate
+cd .claude/worktrees/feature+v3-migration
+# 需代理下载 Nucleus USD 资产：export http_proxy=http://10.176.253.182:8080 https_proxy=...
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-Velocity-Flat-Unitree-G1-v0 --device cuda:0 --headless --max_iterations 5
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --device cuda:1 --headless --max_iterations 50
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-G1-Play-v0 --checkpoint <model.pt> --device cuda:1 --headless
+```
 
 ---
 
