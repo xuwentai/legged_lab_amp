@@ -219,8 +219,8 @@ class PPOAMP(PPO):
         if "terminal_obs" in extras:
             terminal_disc_obs = self.amp_discriminator.get_disc_obs(
                 extras["terminal_obs"], flatten_history_dim=False
-            )
-            done_mask = dones.bool()
+            ).to(disc_obs.device)
+            done_mask = dones.bool().to(disc_obs.device)
             if torch.any(done_mask):
                 disc_obs = disc_obs.clone()
                 disc_obs[done_mask] = terminal_disc_obs[done_mask]
