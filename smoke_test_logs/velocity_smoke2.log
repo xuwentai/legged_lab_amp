@@ -1,0 +1,446 @@
+/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/scripts/rsl_rl/train.py:5: DeprecationWarning: scripts/rsl_rl/train.py is deprecated. Use `./isaaclab.sh train --rl_library rsl_rl --task <TASK>` instead.
+  warnings.warn(
+The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1782905423.789662    8168 descriptor_database.cc:633] File already exists in database: grpc/health/v1/health.proto
+W0000 00:00:1782905423.790601    8168 message.cc:301] Protobuf GeneratedMessageFactory: File is already registered: grpc/health/v1/health.proto
+[ISAACLAB] AppLauncher initialization complete
+Loading user config located at: '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/user.config.json'
+2026-07-01T11:30:21Z [0ms] [Warning] [omni.ext.plugin] [ext: isaaclab_visualizers] Extensions config 'extension.toml' doesn't exist '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_visualizers' or '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_visualizers/config'
+2026-07-01T11:30:24Z [2,471ms] [Warning] [omni.perfmonitor.plugin]  PerfMonitorManager::onStart - error calling pthread_setaffinity_np
+2026-07-01T11:30:24Z [2,552ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-07-01T11:30:24Z [2,605ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-07-01T11:30:26Z [4,247ms] [Warning] [isaacsim.core.simulation_manager.plugin] USD stage is not available; stage-opened subscription is deferred
+2026-07-01T11:30:26Z [4,248ms] [Warning] [isaacsim.core.simulation_manager.plugin] USD stage is not available; stage-opened subscription is deferred
+2026-07-01T11:30:29Z [7,850ms] [Warning] [isaaclab_physx.physics.physx_manager] TGS solver with enable_external_forces_every_iteration=False may cause noisy velocities.
+[INFO]: Parsing configuration from: legged_lab.tasks.locomotion.velocity.config.g1.flat_env_cfg:G1FlatEnvCfg
+[INFO]: Parsing configuration from: legged_lab.tasks.locomotion.velocity.config.g1.agents.rsl_rl_ppo_cfg:G1FlatPPORunnerCfg
+[INFO] Logging experiment in directory: /mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/logs/rsl_rl/g1_flat
+Exact experiment name requested from command line: 2026-07-01_19-30-27
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Environment seed      : 42
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.02
+	Environment step-size : 0.02
+[INFO]: Registered backend 'physx' for factory Articulation.
+2026-07-01T11:30:29Z [8,121ms] [Warning] [isaaclab.terrains.terrain_importer] Visual material specified for ground plane but no diffuse color found. Using default color: (0.0, 0.0, 0.0)
+[INFO]: Registered backend 'physx' for factory FrameView.
+[INFO]: Registered backend 'physx' for factory ContactSensor.
+[INFO]: Physics scene prim path: /physicsScene
+2026-07-01T11:30:32Z [10,949ms] [Warning] [usdrt.population.plugin] Last global time was not created. Did you call setEnableUsdNoticeHandling?
+[INFO]: Time taken for scene creation Last: 1.469239 s, Mean: 1.469239 s, Std: 0.000000 s, N: 1
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 16
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Simulation parameters for joints in /World/envs/env_.*/Robot:
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                                        Simulation Joint Information (Prim path: /World/envs/env_.*/Robot)                                                       |
++-------+----------------------------+-----------+---------+----------+-----------------+------------------+------------------+-----------------+-----------------+---------------+
+| Index | Name                       | Stiffness | Damping | Armature | Static Friction | Dynamic Friction | Viscous Friction | Position Limits | Velocity Limits | Effort Limits |
++-------+----------------------------+-----------+---------+----------+-----------------+------------------+------------------+-----------------+-----------------+---------------+
+|   0   | left_hip_pitch_joint       |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.531, 2.880] |      32.000     |     88.000    |
+|   1   | right_hip_pitch_joint      |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.531, 2.880] |      32.000     |     88.000    |
+|   2   | waist_yaw_joint            |  200.000  |  5.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.618, 2.618] |      32.000     |     88.000    |
+|   3   | left_hip_roll_joint        |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.524, 2.967] |      20.000     |    139.000    |
+|   4   | right_hip_roll_joint       |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.967, 0.524] |      20.000     |    139.000    |
+|   5   | waist_roll_joint           |   40.000  |  5.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.520, 0.520] |      37.000     |     25.000    |
+|   6   | left_hip_yaw_joint         |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.758, 2.758] |      32.000     |     88.000    |
+|   7   | right_hip_yaw_joint        |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.758, 2.758] |      32.000     |     88.000    |
+|   8   | waist_pitch_joint          |   40.000  |  5.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.520, 0.520] |      37.000     |     25.000    |
+|   9   | left_knee_joint            |  150.000  |  4.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.087, 2.880] |      20.000     |    139.000    |
+|   10  | right_knee_joint           |  150.000  |  4.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.087, 2.880] |      20.000     |    139.000    |
+|   11  | left_shoulder_pitch_joint  |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-3.089, 2.670] |      37.000     |     25.000    |
+|   12  | right_shoulder_pitch_joint |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-3.089, 2.670] |      37.000     |     25.000    |
+|   13  | left_ankle_pitch_joint     |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.873, 0.524] |      37.000     |     25.000    |
+|   14  | right_ankle_pitch_joint    |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.873, 0.524] |      37.000     |     25.000    |
+|   15  | left_shoulder_roll_joint   |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.588, 2.251] |      37.000     |     25.000    |
+|   16  | right_shoulder_roll_joint  |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.251, 1.588] |      37.000     |     25.000    |
+|   17  | left_ankle_roll_joint      |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.262, 0.262] |      37.000     |     25.000    |
+|   18  | right_ankle_roll_joint     |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.262, 0.262] |      37.000     |     25.000    |
+|   19  | left_shoulder_yaw_joint    |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.618, 2.618] |      37.000     |     25.000    |
+|   20  | right_shoulder_yaw_joint   |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.618, 2.618] |      37.000     |     25.000    |
+|   21  | left_elbow_joint           |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.047, 2.094] |      37.000     |     25.000    |
+|   22  | right_elbow_joint          |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.047, 2.094] |      37.000     |     25.000    |
+|   23  | left_wrist_roll_joint      |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.972, 1.972] |      37.000     |     25.000    |
+|   24  | right_wrist_roll_joint     |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.972, 1.972] |      37.000     |     25.000    |
+|   25  | left_wrist_pitch_joint     |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
+|   26  | right_wrist_pitch_joint    |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
+|   27  | left_wrist_yaw_joint       |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
+|   28  | right_wrist_yaw_joint      |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
++-------+----------------------------+-----------+---------+----------+-----------------+------------------+------------------+-----------------+-----------------+---------------+
+[INFO]: Time taken for simulation start Last: 1.909248 s, Mean: 1.909248 s, Std: 0.000000 s, N: 1
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Event Manager:  <EventManager> contains 3 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
+|    1     | add_base_mass             |
+|    2     | base_com                  |
++----------+---------------------------+
++---------------------------------------+
+|  Active Event Terms in Mode: 'reset'  |
++--------+------------------------------+
+| Index  | Name                         |
++--------+------------------------------+
+|   0    | base_external_force_torque   |
+|   1    | reset_base                   |
+|   2    | reset_robot_joints           |
++--------+------------------------------+
++----------------------------------------------+
+|    Active Event Terms in Mode: 'interval'    |
++-------+------------+-------------------------+
+| Index | Name       | Interval time range (s) |
++-------+------------+-------------------------+
+|   0   | push_robot |       (10.0, 15.0)      |
++-------+------------+-------------------------+
+
+[INFO] Recorder Manager:  <RecorderManager> contains 0 active terms.
++---------------------+
+| Active Recorder Terms |
++-----------+---------+
+|   Index   | Name    |
++-----------+---------+
++-----------+---------+
+
+[INFO]: Resolved joint names for the action term JointPositionAction: ['left_hip_pitch_joint', 'right_hip_pitch_joint', 'waist_yaw_joint', 'left_hip_roll_joint', 'right_hip_roll_joint', 'waist_roll_joint', 'left_hip_yaw_joint', 'right_hip_yaw_joint', 'waist_pitch_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_pitch_joint', 'right_shoulder_pitch_joint', 'left_ankle_pitch_joint', 'right_ankle_pitch_joint', 'left_shoulder_roll_joint', 'right_shoulder_roll_joint', 'left_ankle_roll_joint', 'right_ankle_roll_joint', 'left_shoulder_yaw_joint', 'right_shoulder_yaw_joint', 'left_elbow_joint', 'right_elbow_joint', 'left_wrist_roll_joint', 'right_wrist_roll_joint', 'left_wrist_pitch_joint', 'right_wrist_pitch_joint', 'left_wrist_yaw_joint', 'right_wrist_yaw_joint'] [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]]
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 29)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          29 |
++--------+-------------+-------------+
+
+[INFO] Observation Manager: <ObservationManager> contains 2 groups.
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (480,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_ang_vel                   |    (15,)    |
+|     1     | projected_gravity              |    (15,)    |
+|     2     | velocity_commands              |    (15,)    |
+|     3     | joint_pos                      |    (145,)   |
+|     4     | joint_vel                      |    (145,)   |
+|     5     | actions                        |    (145,)   |
++-----------+--------------------------------+-------------+
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'critic' (shape: (495,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_lin_vel                   |    (15,)    |
+|     1     | base_ang_vel                   |    (15,)    |
+|     2     | projected_gravity              |    (15,)    |
+|     3     | velocity_commands              |    (15,)    |
+|     4     | joint_pos                      |    (145,)   |
+|     5     | joint_vel                      |    (145,)   |
+|     6     | actions                        |    (145,)   |
++-----------+--------------------------------+-------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 4 active terms.
++----------------------------------------------+
+|           Active Termination Terms           |
++-------+---------------------------+----------+
+| Index | Name                      | Time Out |
++-------+---------------------------+----------+
+|   0   | time_out                  |   True   |
+|   1   | base_contact              |  False   |
+|   2   | bad_orientation           |  False   |
+|   3   | root_height_below_minimum |  False   |
++-------+---------------------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 17 active terms.
++-------------------------------------------------+
+|               Active Reward Terms               |
++-------+--------------------------------+--------+
+| Index | Name                           | Weight |
++-------+--------------------------------+--------+
+|   0   | termination_penalty            | -200.0 |
+|   1   | track_lin_vel_xy_exp           |    1.0 |
+|   2   | track_ang_vel_z_exp            |    1.0 |
+|   3   | flat_orientation_l2            |   -5.0 |
+|   4   | lin_vel_z_l2                   |   -0.2 |
+|   5   | ang_vel_xy_l2                  |  -0.05 |
+|   6   | joint_torques_l2               | -2e-06 |
+|   7   | joint_acc_l2                   | -1e-07 |
+|   8   | action_rate_l2                 | -0.005 |
+|   9   | dof_pos_limits                 |   -1.0 |
+|   10  | feet_air_time                  |   0.75 |
+|   11  | feet_slide                     |   -0.1 |
+|   12  | feet_clearance                 |    1.0 |
+|   13  | joint_deviation_hip            |   -0.1 |
+|   14  | joint_deviation_arms           |   -0.1 |
+|   15  | joint_deviation_waist          |   -0.1 |
+|   16  | stand_still_joint_deviation_l1 |   -0.5 |
++-------+--------------------------------+--------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+[INFO]: Completed setting up the environment...
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['policy']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): Identity()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=480, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=128, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=128, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=29, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): Identity()
+  (mlp): MLP(
+    (0): Linear(in_features=480, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=128, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=128, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+Could not find git repository in /mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/rsl_rl/__init__.py. Skipping.
+Storing git diff for 'feature+v3-migration' in: /mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/logs/rsl_rl/g1_flat/2026-07-01_19-30-27/git/feature+v3-migration.diff
+################################################################################
+[1m                             Learning iteration 0/5                             [0m 
+
+                            Total steps: 384 
+                       Steps per second: 125 
+                        Collection time: 2.499s 
+                          Learning time: 0.557s 
+                        Mean value loss: 3.2106
+                    Mean surrogate loss: -0.0045
+                      Mean entropy loss: 41.1639
+                            Mean reward: -5.41
+                    Mean episode length: 18.00
+                        Mean action std: 1.00
+              Episode_Reward/feet_slide: -0.0022
+            Episode_Reward/lin_vel_z_l2: -0.0004
+       Episode_Termination/base_contact: 0.0938
+          Episode_Reward/feet_clearance: 0.0092
+          Episode_Reward/dof_pos_limits: -0.0001
+     Episode_Reward/joint_deviation_hip: -0.0008
+Episode_Reward/stand_still_joint_deviation_l1: 0.0000
+           Episode_Reward/feet_air_time: 0.0001
+     Metrics/base_velocity/error_vel_xy: 0.5419
+    Episode_Termination/bad_orientation: 0.0339
+        Episode_Reward/joint_torques_l2: -0.0002
+Episode_Termination/root_height_below_minimum: 0.0000
+    Metrics/base_velocity/error_vel_yaw: 3.6456
+            Episode_Reward/joint_acc_l2: -0.0071
+                   Metrics/success_rate: 0.3750
+     Episode_Reward/flat_orientation_l2: -0.0044
+    Episode_Reward/joint_deviation_arms: -0.0030
+           Episode_Reward/ang_vel_xy_l2: -0.0269
+   Episode_Reward/joint_deviation_waist: -0.0006
+     Episode_Reward/termination_penalty: -0.1250
+    Episode_Reward/track_lin_vel_xy_exp: 0.0017
+     Episode_Reward/track_ang_vel_z_exp: 0.0006
+          Episode_Reward/action_rate_l2: -0.0031
+           Episode_Termination/time_out: 0.0000
+--------------------------------------------------------------------------------
+                         Iteration time: 3.06s
+                           Time elapsed: 0:00:03
+                                    ETA: 0:00:12
+
+################################################################################
+[1m                             Learning iteration 1/5                             [0m 
+
+                            Total steps: 768 
+                       Steps per second: 224 
+                        Collection time: 1.606s 
+                          Learning time: 0.106s 
+                        Mean value loss: 2.9679
+                    Mean surrogate loss: -0.1060
+                      Mean entropy loss: 41.1694
+                            Mean reward: -5.67
+                    Mean episode length: 21.50
+                        Mean action std: 1.00
+              Episode_Reward/feet_slide: -0.0043
+            Episode_Reward/lin_vel_z_l2: -0.0009
+       Episode_Termination/base_contact: 0.3047
+          Episode_Reward/feet_clearance: 0.0210
+          Episode_Reward/dof_pos_limits: -0.0002
+     Episode_Reward/joint_deviation_hip: -0.0019
+Episode_Reward/stand_still_joint_deviation_l1: 0.0000
+           Episode_Reward/feet_air_time: 0.0003
+     Metrics/base_velocity/error_vel_xy: 0.8646
+    Episode_Termination/bad_orientation: 0.3516
+        Episode_Reward/joint_torques_l2: -0.0006
+Episode_Termination/root_height_below_minimum: 0.0000
+    Metrics/base_velocity/error_vel_yaw: 5.4741
+            Episode_Reward/joint_acc_l2: -0.0162
+                   Metrics/success_rate: 0.0000
+     Episode_Reward/flat_orientation_l2: -0.0129
+    Episode_Reward/joint_deviation_arms: -0.0081
+           Episode_Reward/ang_vel_xy_l2: -0.0718
+   Episode_Reward/joint_deviation_waist: -0.0015
+     Episode_Reward/termination_penalty: -0.2000
+    Episode_Reward/track_lin_vel_xy_exp: 0.0041
+     Episode_Reward/track_ang_vel_z_exp: 0.0013
+          Episode_Reward/action_rate_l2: -0.0070
+           Episode_Termination/time_out: 0.0000
+--------------------------------------------------------------------------------
+                         Iteration time: 1.71s
+                           Time elapsed: 0:00:04
+                                    ETA: 0:00:07
+
+################################################################################
+[1m                             Learning iteration 2/5                             [0m 
+
+                            Total steps: 1152 
+                       Steps per second: 340 
+                        Collection time: 1.021s 
+                          Learning time: 0.105s 
+                        Mean value loss: 3.1516
+                    Mean surrogate loss: -0.1123
+                      Mean entropy loss: 41.1759
+                            Mean reward: -6.33
+                    Mean episode length: 26.75
+                        Mean action std: 1.00
+              Episode_Reward/feet_slide: -0.0067
+            Episode_Reward/lin_vel_z_l2: -0.0018
+       Episode_Termination/base_contact: 0.4167
+          Episode_Reward/feet_clearance: 0.0300
+          Episode_Reward/dof_pos_limits: -0.0005
+     Episode_Reward/joint_deviation_hip: -0.0032
+Episode_Reward/stand_still_joint_deviation_l1: -0.0254
+           Episode_Reward/feet_air_time: 0.0005
+     Metrics/base_velocity/error_vel_xy: 0.8445
+    Episode_Termination/bad_orientation: 0.3802
+        Episode_Reward/joint_torques_l2: -0.0009
+Episode_Termination/root_height_below_minimum: 0.0573
+    Metrics/base_velocity/error_vel_yaw: 5.5676
+            Episode_Reward/joint_acc_l2: -0.0244
+                   Metrics/success_rate: 0.0000
+     Episode_Reward/flat_orientation_l2: -0.0182
+    Episode_Reward/joint_deviation_arms: -0.0118
+           Episode_Reward/ang_vel_xy_l2: -0.0974
+   Episode_Reward/joint_deviation_waist: -0.0023
+     Episode_Reward/termination_penalty: -0.2000
+    Episode_Reward/track_lin_vel_xy_exp: 0.0079
+     Episode_Reward/track_ang_vel_z_exp: 0.0019
+          Episode_Reward/action_rate_l2: -0.0102
+           Episode_Termination/time_out: 0.0000
+--------------------------------------------------------------------------------
+                         Iteration time: 1.13s
+                           Time elapsed: 0:00:05
+                                    ETA: 0:00:03
+
+################################################################################
+[1m                             Learning iteration 3/5                             [0m 
+
+                            Total steps: 1536 
+                       Steps per second: 335 
+                        Collection time: 1.041s 
+                          Learning time: 0.105s 
+                        Mean value loss: 2.1570
+                    Mean surrogate loss: -0.1101
+                      Mean entropy loss: 41.1839
+                            Mean reward: -6.43
+                    Mean episode length: 27.60
+                        Mean action std: 1.00
+              Episode_Reward/feet_slide: -0.0052
+            Episode_Reward/lin_vel_z_l2: -0.0012
+       Episode_Termination/base_contact: 0.2812
+          Episode_Reward/feet_clearance: 0.0222
+          Episode_Reward/dof_pos_limits: -0.0003
+     Episode_Reward/joint_deviation_hip: -0.0022
+Episode_Reward/stand_still_joint_deviation_l1: -0.0059
+           Episode_Reward/feet_air_time: 0.0003
+     Metrics/base_velocity/error_vel_xy: 0.9026
+    Episode_Termination/bad_orientation: 0.6875
+        Episode_Reward/joint_torques_l2: -0.0007
+Episode_Termination/root_height_below_minimum: 0.0182
+    Metrics/base_velocity/error_vel_yaw: 5.3747
+            Episode_Reward/joint_acc_l2: -0.0163
+                   Metrics/success_rate: 0.0000
+     Episode_Reward/flat_orientation_l2: -0.0143
+    Episode_Reward/joint_deviation_arms: -0.0089
+           Episode_Reward/ang_vel_xy_l2: -0.0671
+   Episode_Reward/joint_deviation_waist: -0.0016
+     Episode_Reward/termination_penalty: -0.2000
+    Episode_Reward/track_lin_vel_xy_exp: 0.0045
+     Episode_Reward/track_ang_vel_z_exp: 0.0016
+          Episode_Reward/action_rate_l2: -0.0076
+           Episode_Termination/time_out: 0.0000
+--------------------------------------------------------------------------------
+                         Iteration time: 1.15s
+                           Time elapsed: 0:00:07
+                                    ETA: 0:00:01
+
+################################################################################
+[1m                             Learning iteration 4/5                             [0m 
+
+                            Total steps: 1920 
+                       Steps per second: 351 
+                        Collection time: 0.986s 
+                          Learning time: 0.105s 
+                        Mean value loss: 1.6586
+                    Mean surrogate loss: -0.1105
+                      Mean entropy loss: 41.1888
+                            Mean reward: -6.31
+                    Mean episode length: 27.25
+                        Mean action std: 1.00
+              Episode_Reward/feet_slide: -0.0050
+            Episode_Reward/lin_vel_z_l2: -0.0012
+       Episode_Termination/base_contact: 0.4141
+          Episode_Reward/feet_clearance: 0.0224
+          Episode_Reward/dof_pos_limits: -0.0003
+     Episode_Reward/joint_deviation_hip: -0.0025
+Episode_Reward/stand_still_joint_deviation_l1: 0.0000
+           Episode_Reward/feet_air_time: 0.0005
+     Metrics/base_velocity/error_vel_xy: 0.8250
+    Episode_Termination/bad_orientation: 0.5859
+        Episode_Reward/joint_torques_l2: -0.0007
+Episode_Termination/root_height_below_minimum: 0.0000
+    Metrics/base_velocity/error_vel_yaw: 6.0804
+            Episode_Reward/joint_acc_l2: -0.0164
+                   Metrics/success_rate: 0.0000
+     Episode_Reward/flat_orientation_l2: -0.0095
+    Episode_Reward/joint_deviation_arms: -0.0089
+           Episode_Reward/ang_vel_xy_l2: -0.0648
+   Episode_Reward/joint_deviation_waist: -0.0017
+     Episode_Reward/termination_penalty: -0.2000
+    Episode_Reward/track_lin_vel_xy_exp: 0.0060
+     Episode_Reward/track_ang_vel_z_exp: 0.0010
+          Episode_Reward/action_rate_l2: -0.0081
+           Episode_Termination/time_out: 0.0000
+--------------------------------------------------------------------------------
+                         Iteration time: 1.09s
+                           Time elapsed: 0:00:08
+                                    ETA: 0:00:00
+
+Training time: 9.04 seconds
+[INFO]: SimulationContext cleared
