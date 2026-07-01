@@ -5,10 +5,10 @@ from dataclasses import MISSING
 from typing import TYPE_CHECKING
 
 import isaaclab.utils.math as math_utils
-from isaaclab.assets import Articulation
 from isaaclab.managers import SceneEntityCfg
 
 if TYPE_CHECKING:
+    from isaaclab.assets import Articulation  # runtime class, guarded per v3 pattern
     from legged_lab.envs import ManagerBasedAnimationEnv
     from legged_lab.managers import AnimationTerm
 

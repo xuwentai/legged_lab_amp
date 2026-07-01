@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import isaaclab.sim as sim_utils
 import isaaclab.utils.math as math_utils
-from isaaclab.assets import Articulation
 from isaaclab.managers import ManagerBase, ManagerTermBase
 from isaaclab.markers import VisualizationMarkers, VisualizationMarkersCfg
 
@@ -15,6 +14,10 @@ from .animation_manager_cfg import AnimationTermCfg
 from .motion_data_manager import MotionDataTerm
 
 if TYPE_CHECKING:
+    # Guard all runtime asset/env class imports behind TYPE_CHECKING (v3 pattern).
+    # With `from __future__ import annotations` at the top, these are never evaluated
+    # at runtime — only visible to static type checkers (mypy, pyright, IDE).
+    from isaaclab.assets import Articulation
     from legged_lab.envs import ManagerBasedAnimationEnv
 
 

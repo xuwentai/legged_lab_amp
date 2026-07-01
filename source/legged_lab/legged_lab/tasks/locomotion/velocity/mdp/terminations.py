@@ -14,10 +14,11 @@ from __future__ import annotations
 import torch
 from typing import TYPE_CHECKING
 
-from isaaclab.assets import RigidObject
 from isaaclab.managers import SceneEntityCfg
 
 if TYPE_CHECKING:
+    # runtime class - guarded per v3 TYPE_CHECKING pattern (no pxr at module import)
+    from isaaclab.assets import RigidObject
     from isaaclab.envs import ManagerBasedRLEnv
 
 

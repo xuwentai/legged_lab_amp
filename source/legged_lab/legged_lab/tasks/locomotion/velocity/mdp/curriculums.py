@@ -15,12 +15,16 @@ import torch
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from isaaclab.assets import Articulation
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.terrains import TerrainImporter
 
 if TYPE_CHECKING:
+    # Runtime classes guarded per v3 TYPE_CHECKING pattern.
+    # With `from __future__ import annotations`, these are never evaluated at runtime —
+    # local variable annotations like `terrain: TerrainImporter = env.scene.terrain`
+    # are just hints for IDE/type-checker, not actual imports.
+    from isaaclab.assets import Articulation
     from isaaclab.envs import ManagerBasedRLEnv
+    from isaaclab.terrains import TerrainImporter  # runtime class (loads pxr if imported at module level)
 
 
 def terrain_levels_vel(

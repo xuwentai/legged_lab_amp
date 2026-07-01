@@ -4,12 +4,12 @@ import torch
 from typing import TYPE_CHECKING
 
 import isaaclab.utils.math as math_utils
-from isaaclab.assets import RigidObject
 from isaaclab.envs import mdp
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.sensors import ContactSensor
 
 if TYPE_CHECKING:
+    from isaaclab.assets import RigidObject  # runtime class, guarded per v3 pattern
+    from isaaclab.sensors import ContactSensor  # runtime class, guarded per v3 pattern
     from isaaclab.envs import ManagerBasedRLEnv
 
 

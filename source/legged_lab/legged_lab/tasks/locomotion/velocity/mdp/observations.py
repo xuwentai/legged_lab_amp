@@ -4,9 +4,10 @@ import torch
 from typing import TYPE_CHECKING
 
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.sensors import RayCaster
 
 if TYPE_CHECKING:
+    # runtime class - guarded per v3 TYPE_CHECKING pattern (no pxr at module import)
+    from isaaclab.sensors import RayCaster
     from isaaclab.envs import ManagerBasedEnv
 
 

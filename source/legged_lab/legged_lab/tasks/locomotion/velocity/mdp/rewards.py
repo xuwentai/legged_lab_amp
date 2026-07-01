@@ -14,13 +14,14 @@ from __future__ import annotations
 import torch
 from typing import TYPE_CHECKING
 
-from isaaclab.assets import Articulation, RigidObject
 from isaaclab.envs import mdp
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.sensors import ContactSensor
 from isaaclab.utils.math import quat_apply_inverse, yaw_quat
 
 if TYPE_CHECKING:
+    # runtime class - guarded per v3 TYPE_CHECKING pattern (no pxr at module import)
+    from isaaclab.assets import Articulation, RigidObject
+    from isaaclab.sensors import ContactSensor
     from isaaclab.envs import ManagerBasedRLEnv
 
 
