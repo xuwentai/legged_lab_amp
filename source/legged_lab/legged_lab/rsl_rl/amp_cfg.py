@@ -26,6 +26,11 @@ class RslRlAmpCfg:
     disc_max_grad_norm: float = 1.0
     """Maximum gradient norm for the discriminator networks"""
 
+    disc_update_interval: int = 1
+    """Discriminator update interval: perform a discriminator gradient step only once every this
+    many PPO mini-batch steps. Values > 1 slow down the discriminator relative to the policy,
+    helping prevent early saturation. Default 1 = update every mini-batch (original behaviour)."""
+
     @configclass
     class AMPDiscriminatorCfg:
         """Configuration for the AMP discriminator network."""
