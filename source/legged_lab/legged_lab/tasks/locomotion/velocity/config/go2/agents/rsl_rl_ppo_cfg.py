@@ -1,10 +1,9 @@
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
-# All rights reserved.
-#
-# SPDX-License-Identifier: BSD-3-Clause
-
 from isaaclab.utils.configclass import configclass
-from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
+from isaaclab_rl.rsl_rl import (
+    RslRlMLPModelCfg,
+    RslRlOnPolicyRunnerCfg,
+    RslRlPpoAlgorithmCfg,
+)
 
 
 @configclass
@@ -13,13 +12,22 @@ class Go2FlatPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     max_iterations = 5000
     save_interval = 50
     experiment_name = "go2_flat"
-    policy = RslRlPpoActorCriticCfg(
-        init_noise_std=1.0,
-        actor_obs_normalization=False,
-        critic_obs_normalization=False,
-        actor_hidden_dims=[512, 256, 128],
-        critic_hidden_dims=[512, 256, 128],
+
+    # v3 modular actor/critic (replaces deprecated policy = RslRlPpoActorCriticCfg)
+    obs_groups = {
+        "actor": ["policy"],
+        "critic": ["policy"],
+    }
+    actor = RslRlMLPModelCfg(
+        hidden_dims=[512, 256, 128],
         activation="elu",
+        obs_normalization=False,
+        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
+    )
+    critic = RslRlMLPModelCfg(
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=False,
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,
