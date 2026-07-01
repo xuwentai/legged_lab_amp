@@ -43,3 +43,7 @@ _build
 # Codex local environment
 .codex/env.local.sh
 .agents/.local.env
+
+# smoke test logs (local only)
+smoke_test_logs/
+logs/
