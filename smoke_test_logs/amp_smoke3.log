@@ -1,0 +1,240 @@
+/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/scripts/rsl_rl/train.py:5: DeprecationWarning: scripts/rsl_rl/train.py is deprecated. Use `./isaaclab.sh train --rl_library rsl_rl --task <TASK>` instead.
+  warnings.warn(
+The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1782905884.120687   18647 descriptor_database.cc:633] File already exists in database: grpc/health/v1/health.proto
+W0000 00:00:1782905884.122144   18647 message.cc:301] Protobuf GeneratedMessageFactory: File is already registered: grpc/health/v1/health.proto
+free(): invalid pointer
+[Warning] [simulation_app.simulation_app] Modules: ['pxr', 'pxr.Tf._tf', 'pxr.Tf', 'pxr.Trace._trace', 'pxr.Trace', 'pxr.Work._work', 'pxr.Work', 'pxr.Plug._plug', 'pxr.Plug', 'pxr.Gf._gf', 'pxr.Gf', 'pxr.Vt._vt', 'pxr.Vt', 'pxr.Ar._ar', 'pxr.Ar', 'pxr.Ts._ts', 'pxr.Ts', 'pxr.Sdf._sdf', 'pxr.Sdf', 'pxr.Kind._kind', 'pxr.Kind', 'pxr.Pcp._pcp', 'pxr.Pcp', 'pxr.Usd._usd', 'pxr.Usd', 'pxr.UsdGeom._usdGeom', 'pxr.UsdGeom', 'pxr.Sdr._sdr', 'pxr.Sdr', 'pxr.UsdShade._usdShade', 'pxr.UsdShade', 'pxr.UsdPhysics._usdPhysics', 'pxr.UsdPhysics', 'pxr.UsdUI._usdUI', 'pxr.UsdUI', 'pxr.UsdUtils._usdUtils', 'pxr.UsdUtils.constantsGroup', 'pxr.UsdUtils.complianceChecker', 'pxr.UsdUtils.updateSchemaWithSdrNode', 'pxr.UsdUtils.fixBrokenPixarSchemas', 'pxr.UsdUtils.usdzUtils', 'pxr.UsdUtils'] were loaded before SimulationApp was started and might not be loaded correctly.
+[Warning] [simulation_app.simulation_app] Please check to make sure no extra omniverse or pxr modules are imported before the call to SimulationApp(...)
+Loading user config located at: '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/user.config.json'
+2026-07-01T11:38:02Z [0ms] [Warning] [omni.ext.plugin] [ext: isaaclab_visualizers] Extensions config 'extension.toml' doesn't exist '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_visualizers' or '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_visualizers/config'
+2026-07-01T11:38:04Z [2,443ms] [Warning] [omni.perfmonitor.plugin]  PerfMonitorManager::onStart - error calling pthread_setaffinity_np
+2026-07-01T11:38:04Z [2,552ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-07-01T11:38:04Z [2,603ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-07-01T11:38:31Z [0ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] A crash has occurred.  If a debugger should be attached, please set the '/crashreporter/debuggerAttachTimeoutMs' setting to a timeout in milliseconds.  This can be used to allow the crash reporter to wait for up to that long for a debugger to attach before processing or sending the crash report.
+2026-07-01T11:38:31Z [267ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] compressing 3 files into '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip' for upload.
+2026-07-01T11:38:32Z [831ms] [Error] [carb.crashreporter-breakpad.plugin] [crash] Wrote dump file '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip'
+2026-07-01T11:38:32Z [836ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] Uploading minidump: file:'/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip' svr:'https://services.nvidia.com/submit'
+2026-07-01T11:38:32Z [837ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] Crash metadata for upload:
+2026-07-01T11:38:32Z [839ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'BuildGitlabJobID' = '309921131'
+2026-07-01T11:38:32Z [840ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'CarbSdkVersion' = '210.1.5+release.12978.b22b555f.gl'
+2026-07-01T11:38:32Z [841ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'CrashTime' = 'Wed Jul  1 11:38:31 2026 GMT'
+2026-07-01T11:38:32Z [842ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'DumpId' = '0501c68b-b7be-431f-5dc272a8-a9a666d8'
+2026-07-01T11:38:32Z [843ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'GlibcVersion' = '2.35'
+2026-07-01T11:38:32Z [844ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'LastUploadStatus' = ''
+2026-07-01T11:38:32Z [845ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'ProductName' = 'OmniverseKit'
+2026-07-01T11:38:32Z [846ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'PythonTracebackStatus' = ''py-spy' successfully wrote info to '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.py.txt''
+2026-07-01T11:38:32Z [847ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'RetryCount' = '0'
+2026-07-01T11:38:32Z [848ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'StartupTime' = '1782905882'
+2026-07-01T11:38:32Z [849ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'UploadSuccessful' = '0'
+2026-07-01T11:38:32Z [850ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'UptimeSeconds' = '29'
+2026-07-01T11:38:32Z [851ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'UserEmail' = ''
+2026-07-01T11:38:32Z [853ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'UserStory' = ''
+2026-07-01T11:38:32Z [854ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'UserStoryStatus' = 'Running in headless mode; not gathering user story'
+2026-07-01T11:38:32Z [855ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'Version' = '110.1.1+production.305458.6312fa25.gl'
+2026-07-01T11:38:32Z [856ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'appName' = 'IsaacLab'
+2026-07-01T11:38:32Z [857ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'appState' = 'startup'
+2026-07-01T11:38:32Z [858ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'appVersion' = '3.0.0'
+2026-07-01T11:38:32Z [859ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'autoloadExts' = ''
+2026-07-01T11:38:32Z [860ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildBranch' = 'production'
+2026-07-01T11:38:32Z [861ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildCi' = 'gl'
+2026-07-01T11:38:32Z [862ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildConfig' = 'release'
+2026-07-01T11:38:32Z [863ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildGitlabJobName' = 'kit-build-release-linux-x86_64'
+2026-07-01T11:38:32Z [864ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildGitlabJobStage' = 'kit-build'
+2026-07-01T11:38:32Z [865ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildGitlabPipelineID' = '50093810'
+2026-07-01T11:38:32Z [866ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildHash' = '6312fa25'
+2026-07-01T11:38:32Z [867ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildMajor' = '110'
+2026-07-01T11:38:32Z [868ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildMinor' = '1'
+2026-07-01T11:38:32Z [869ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildNumber' = '305458'
+2026-07-01T11:38:32Z [870ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildPatch' = '1'
+2026-07-01T11:38:32Z [871ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'buildVersion' = '110.1.1'
+2026-07-01T11:38:32Z [872ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'commandLine' = 'python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --device cuda:1 --num_envs 16 --max_iterations 50 --headless'
+2026-07-01T11:38:32Z [873ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuCoreLimited' = '102'
+2026-07-01T11:38:32Z [874ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuId' = 'Intel64 Family 23 Model 49 Stepping 0'
+2026-07-01T11:38:32Z [875ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuLogicalCoresBareMetal' = '192'
+2026-07-01T11:38:32Z [876ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuName' = 'AMD EPYC 7642 48-Core Processor'
+2026-07-01T11:38:32Z [877ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuPhysicalCoresBareMetal' = '96'
+2026-07-01T11:38:32Z [878ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuUsageQuota' = '72.000000'
+2026-07-01T11:38:32Z [880ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'cpuVendor' = 'AuthenticAMD'
+2026-07-01T11:38:32Z [881ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'environmentName' = 'Individual'
+2026-07-01T11:38:32Z [882ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'experience' = 'Isaac Sim'
+2026-07-01T11:38:32Z [883ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'externalBuild' = '1'
+2026-07-01T11:38:32Z [884ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'graphicsApi' = 'vulkan'
+2026-07-01T11:38:32Z [885ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'memoryStats' = '(avail/total) RAM: 355.512/991.489GB, Swap: 0/0GB, VM: 1.71799e+10/1.71799e+10GB'
+2026-07-01T11:38:32Z [886ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'osDistro' = 'ubuntu'
+2026-07-01T11:38:32Z [887ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'osName' = '22.04.5 LTS (Jammy Jellyfish)'
+2026-07-01T11:38:32Z [888ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'osVersion' = '22.04.5'
+2026-07-01T11:38:32Z [889ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'portableMode' = '1'
+2026-07-01T11:38:32Z [890ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'runEnvironment' = 'Individual'
+2026-07-01T11:38:32Z [891ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'runningInContainer' = '1'
+2026-07-01T11:38:32Z [892ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'telemetrySessionId' = '16244309495848528741'
+2026-07-01T11:38:32Z [893ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'terminatedByAbort' = '0'
+2026-07-01T11:38:32Z [894ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'totalRamBareMetalMB' = '1015284'
+2026-07-01T11:38:32Z [895ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'totalRamLimitedMB' = '376832'
+2026-07-01T11:38:32Z [896ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'totalSwapBareMetalMB' = '0'
+2026-07-01T11:38:32Z [897ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'totalSwapLimitedMB' = '0'
+2026-07-01T11:38:32Z [898ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'userId' = 'default'
+2026-07-01T11:38:32Z [899ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'workingDirectory' = '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration'
+2026-07-01T11:38:32Z [900ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] Crash report files for upload:
+2026-07-01T11:38:32Z [901ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]   'upload_file_minidump' = '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip'
+2026-07-01T11:40:14Z [102,811ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] uploaded minidump: file: '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip', code:200, response:
+2026-07-01T11:40:14Z [102,812ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]     6a98e9d8-a049-4311-88e8-4ff8ddfd37ac
+2026-07-01T11:40:14Z [102,814ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] Deleting file: '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip' (use setting "/crashreporter/preserveDump=true" to save)
+2026-07-01T11:40:14Z [102,819ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] Deleting file: '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.dmp.zip.toml'
+2026-07-01T11:40:14Z [102,823ms] [Error] [carb.crashreporter-breakpad.plugin] [crash]     dump file size is 0 bytes, file is readable.
+2026-07-01T11:40:14Z [102,874ms] [Fatal] [carb.crashreporter-breakpad.plugin] [crash] Crash detected in pid 18647 thread 18647
+2026-07-01T11:40:14Z [102,875ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash] Crash metadata:
+2026-07-01T11:40:14Z [102,876ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  BuildGitlabJobID = '309921131'
+2026-07-01T11:40:14Z [102,878ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  CarbSdkVersion = '210.1.5+release.12978.b22b555f.gl'
+2026-07-01T11:40:14Z [102,879ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  CrashTime = 'Wed Jul  1 11:38:31 2026 GMT'
+2026-07-01T11:40:14Z [102,880ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  DumpId = '0501c68b-b7be-431f-5dc272a8-a9a666d8'
+2026-07-01T11:40:14Z [102,881ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  GlibcVersion = '2.35'
+2026-07-01T11:40:14Z [102,882ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  LastUploadStatus = '200'
+2026-07-01T11:40:14Z [102,883ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  ProductName = 'OmniverseKit'
+2026-07-01T11:40:14Z [102,884ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  PythonTracebackStatus = ''py-spy' successfully wrote info to '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/0501c68b-b7be-431f-5dc272a8-a9a666d8.py.txt''
+2026-07-01T11:40:14Z [102,885ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  RetryCount = '0'
+2026-07-01T11:40:14Z [102,886ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  StartupTime = '1782905882'
+2026-07-01T11:40:14Z [102,888ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  UploadSuccessful = '0'
+2026-07-01T11:40:14Z [102,889ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  UptimeSeconds = '29'
+2026-07-01T11:40:14Z [102,890ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  UserEmail = ''
+2026-07-01T11:40:14Z [102,891ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  UserStory = ''
+2026-07-01T11:40:14Z [102,892ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  UserStoryStatus = 'Running in headless mode; not gathering user story'
+2026-07-01T11:40:14Z [102,893ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  Version = '110.1.1+production.305458.6312fa25.gl'
+2026-07-01T11:40:14Z [102,894ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  appName = 'IsaacLab'
+2026-07-01T11:40:14Z [102,895ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  appState = 'startup'
+2026-07-01T11:40:14Z [102,896ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  appVersion = '3.0.0'
+2026-07-01T11:40:14Z [102,897ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  autoloadExts = ''
+2026-07-01T11:40:14Z [102,899ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildBranch = 'production'
+2026-07-01T11:40:14Z [102,900ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildCi = 'gl'
+2026-07-01T11:40:14Z [102,901ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildConfig = 'release'
+2026-07-01T11:40:14Z [102,902ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildGitlabJobName = 'kit-build-release-linux-x86_64'
+2026-07-01T11:40:14Z [102,903ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildGitlabJobStage = 'kit-build'
+2026-07-01T11:40:14Z [102,904ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildGitlabPipelineID = '50093810'
+2026-07-01T11:40:14Z [102,905ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildHash = '6312fa25'
+2026-07-01T11:40:14Z [102,906ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildMajor = '110'
+2026-07-01T11:40:14Z [102,907ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildMinor = '1'
+2026-07-01T11:40:14Z [102,908ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildNumber = '305458'
+2026-07-01T11:40:14Z [102,909ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildPatch = '1'
+2026-07-01T11:40:14Z [102,910ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  buildVersion = '110.1.1'
+2026-07-01T11:40:14Z [102,911ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  commandLine = 'python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --device cuda:1 --num_envs 16 --max_iterations 50 --headless'
+2026-07-01T11:40:14Z [102,912ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuCoreLimited = '102'
+2026-07-01T11:40:14Z [102,913ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuId = 'Intel64 Family 23 Model 49 Stepping 0'
+2026-07-01T11:40:14Z [102,914ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuLogicalCoresBareMetal = '192'
+2026-07-01T11:40:14Z [102,916ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuName = 'AMD EPYC 7642 48-Core Processor'
+2026-07-01T11:40:14Z [102,917ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuPhysicalCoresBareMetal = '96'
+2026-07-01T11:40:14Z [102,918ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuUsageQuota = '72.000000'
+2026-07-01T11:40:14Z [102,919ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  cpuVendor = 'AuthenticAMD'
+2026-07-01T11:40:14Z [102,920ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  environmentName = 'Individual'
+2026-07-01T11:40:14Z [102,921ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  experience = 'Isaac Sim'
+2026-07-01T11:40:14Z [102,922ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  externalBuild = '1'
+2026-07-01T11:40:14Z [102,923ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  graphicsApi = 'vulkan'
+2026-07-01T11:40:14Z [102,924ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  memoryStats = '(avail/total) RAM: 355.512/991.489GB, Swap: 0/0GB, VM: 1.71799e+10/1.71799e+10GB'
+2026-07-01T11:40:14Z [102,925ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  osDistro = 'ubuntu'
+2026-07-01T11:40:14Z [102,926ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  osName = '22.04.5 LTS (Jammy Jellyfish)'
+2026-07-01T11:40:14Z [102,927ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  osVersion = '22.04.5'
+2026-07-01T11:40:14Z [102,928ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  portableMode = '1'
+2026-07-01T11:40:14Z [102,929ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  runEnvironment = 'Individual'
+2026-07-01T11:40:14Z [102,930ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  runningInContainer = '1'
+2026-07-01T11:40:14Z [102,931ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  telemetrySessionId = '16244309495848528741'
+2026-07-01T11:40:14Z [102,932ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  terminatedByAbort = '0'
+2026-07-01T11:40:14Z [102,933ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  totalRamBareMetalMB = '1015284'
+2026-07-01T11:40:14Z [102,934ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  totalRamLimitedMB = '376832'
+2026-07-01T11:40:14Z [102,935ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  totalSwapBareMetalMB = '0'
+2026-07-01T11:40:14Z [102,936ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  totalSwapLimitedMB = '0'
+2026-07-01T11:40:14Z [102,937ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  userId = 'default'
+2026-07-01T11:40:14Z [102,938ms] [Warning] [carb.crashreporter-breakpad.plugin] [crash]  workingDirectory = '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration'
+2026-07-01T11:40:14Z [102,939ms] [Fatal] [carb.crashreporter-breakpad.plugin] [crash] Thread 18647 backtrace follows:
+2026-07-01T11:40:14Z [103,047ms] [Fatal] [carb.crashreporter-breakpad.plugin] 000: libc.so.6!__sigaction+0x50 (libc_sigaction.c:?)
+2026-07-01T11:40:14Z [103,141ms] [Fatal] [carb.crashreporter-breakpad.plugin] 001: libc.so.6!pthread_kill+0x12c (./nptl/pthread_kill.c:44)
+2026-07-01T11:40:14Z [103,232ms] [Fatal] [carb.crashreporter-breakpad.plugin] 002: libc.so.6!raise+0x16 (./signal/../sysdeps/posix/raise.c:27)
+2026-07-01T11:40:14Z [103,323ms] [Fatal] [carb.crashreporter-breakpad.plugin] 003: libc.so.6!abort+0xd3 (./stdlib/abort.c:81 (discriminator 21))
+2026-07-01T11:40:14Z [103,416ms] [Fatal] [carb.crashreporter-breakpad.plugin] 004: libc.so.6!__fsetlocking+0x427 (./libio/../sysdeps/posix/libc_fatal.c:156)
+2026-07-01T11:40:14Z [103,516ms] [Fatal] [carb.crashreporter-breakpad.plugin] 005: libc.so.6!timer_settime+0x2cc (./malloc/malloc.c:5668)
+2026-07-01T11:40:15Z [103,619ms] [Fatal] [carb.crashreporter-breakpad.plugin] 006: libc.so.6!__default_morecore+0x494 (./malloc/malloc.c:4439)
+2026-07-01T11:40:15Z [103,719ms] [Fatal] [carb.crashreporter-breakpad.plugin] 007: libc.so.6!free+0x73 (./malloc/malloc.c:3394)
+2026-07-01T11:40:15Z [103,763ms] [Fatal] [carb.crashreporter-breakpad.plugin] 008: libstdc++.so.6!std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)+0x8f ***
+2026-07-01T11:40:15Z [103,807ms] [Fatal] [carb.crashreporter-breakpad.plugin] 009: libusd_tf.so!pxrInternal_v0_25_11__pxrReserved__::TfEnum::_AddName(pxrInternal_v0_25_11__pxrReserved__::TfEnum, char const*, char const*)+0x5a8 ***
+2026-07-01T11:40:15Z [103,849ms] [Fatal] [carb.crashreporter-breakpad.plugin] 010: libusd_tf.so!pxrInternal_v0_25_11__pxrReserved__::Tf_CreateSiblingTempFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*)+0x8cc ***
+2026-07-01T11:40:15Z [103,889ms] [Fatal] [carb.crashreporter-breakpad.plugin] 011: libusd_tf.so!pxrInternal_v0_25_11__pxrReserved__::TfRegistryManager::RunUnloadersAtExit()+0x803 ***
+2026-07-01T11:40:15Z [103,931ms] [Fatal] [carb.crashreporter-breakpad.plugin] 012: libusd_tf.so!pxrInternal_v0_25_11__pxrReserved__::TfRegistryManager::_SubscribeTo(std::type_info const&)+0x24e ***
+2026-07-01T11:40:15Z [103,974ms] [Fatal] [carb.crashreporter-breakpad.plugin] 013: libusd_tf.so!std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > > > >::_M_get_insert_hint_unique_pos(std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)+0xfc1 ***
+2026-07-01T11:40:15Z [104,015ms] [Fatal] [carb.crashreporter-breakpad.plugin] 014: libusd_tf.so!std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > > > >::_M_get_insert_hint_unique_pos(std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::set<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*, std::less<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*>, std::allocator<pxrInternal_v0_25_11__pxrReserved__::TfDebug::_Node*> > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)+0x1345 ***
+2026-07-01T11:40:15Z [104,063ms] [Fatal] [carb.crashreporter-breakpad.plugin] 015: ld-linux-x86-64.so.2!__nptl_change_stack_perm+0x12ce (./elf/dl-init.c:69)
+2026-07-01T11:40:15Z [104,112ms] [Fatal] [carb.crashreporter-breakpad.plugin] 016: ld-linux-x86-64.so.2!__nptl_change_stack_perm+0x13b8 (./elf/dl-init.c:116)
+2026-07-01T11:40:15Z [104,407ms] [Fatal] [carb.crashreporter-breakpad.plugin] 017: libc.so.6!_dl_catch_exception+0xe5 (./elf/dl-error-skeleton.c:184)
+2026-07-01T11:40:15Z [104,459ms] [Fatal] [carb.crashreporter-breakpad.plugin] 018: ld-linux-x86-64.so.2!_dl_rtld_di_serinfo+0x3096 (./elf/dl-open.c:812)
+2026-07-01T11:40:16Z [104,575ms] [Fatal] [carb.crashreporter-breakpad.plugin] 019: libc.so.6!_dl_catch_exception+0x88 (./elf/dl-error-skeleton.c:209)
+2026-07-01T11:40:16Z [104,625ms] [Fatal] [carb.crashreporter-breakpad.plugin] 020: ld-linux-x86-64.so.2!_dl_find_dso_for_object+0x17e (./elf/dl-open.c:883)
+2026-07-01T11:40:16Z [104,718ms] [Fatal] [carb.crashreporter-breakpad.plugin] 021: libc.so.6!dlmopen+0xfc (./dlfcn/dlopen.c:56 (discriminator 8))
+2026-07-01T11:40:16Z [104,825ms] [Fatal] [carb.crashreporter-breakpad.plugin] 022: libc.so.6!_dl_catch_exception+0x88 (./elf/dl-error-skeleton.c:209)
+2026-07-01T11:40:16Z [104,934ms] [Fatal] [carb.crashreporter-breakpad.plugin] 023: libc.so.6!_dl_catch_error+0x33 (./elf/dl-error-skeleton.c:228)
+2026-07-01T11:40:16Z [105,026ms] [Fatal] [carb.crashreporter-breakpad.plugin] 024: libc.so.6!dlerror+0x2ae (./dlfcn/dlerror.c:145)
+2026-07-01T11:40:16Z [105,120ms] [Fatal] [carb.crashreporter-breakpad.plugin] 025: libc.so.6!dlopen+0x48 (./dlfcn/dlopen.c:71)
+2026-07-01T11:40:16Z [105,165ms] [Fatal] [carb.crashreporter-breakpad.plugin] 026: libomni.ext.plugin.so!std::ctype<char>::do_widen(char) const+0xcb8 ***
+2026-07-01T11:40:16Z [105,208ms] [Fatal] [carb.crashreporter-breakpad.plugin] 027: libomni.ext.plugin.so!void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&>(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)+0x2448 ***
+2026-07-01T11:40:16Z [105,250ms] [Fatal] [carb.crashreporter-breakpad.plugin] 028: libomni.ext.plugin.so!void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&>(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)+0x2b6b ***
+2026-07-01T11:40:16Z [105,291ms] [Fatal] [carb.crashreporter-breakpad.plugin] 029: libomni.ext.plugin.so!std::__detail::__variant::__gen_vtable_impl<std::__detail::__variant::_Multi_array<std::__detail::__variant::__variant_idx_cookie (*)(std::variant<void*, std::array<std::byte, 16ul> >::swap(std::variant<void*, std::array<std::byte, 16ul> >&)::{lambda(auto:1&&, auto:2)#1}&&, std::variant<void*, std::array<std::byte, 16ul> >&)>, std::integer_sequence<unsigned long, 0ul> >::__visit_invoke(std::variant<void*, std::array<std::byte, 16ul> >::swap(std::variant<void*, std::array<std::byte, 16ul> >&)::{lambda(auto:1&&, auto:2)#1}&&, std::variant<void*, std::array<std::byte, 16ul> >&)+0x8ebf ***
+2026-07-01T11:40:16Z [105,331ms] [Fatal] [carb.crashreporter-breakpad.plugin] 030: libomni.ext.plugin.so!void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)+0x131b5 ***
+2026-07-01T11:40:16Z [105,373ms] [Fatal] [carb.crashreporter-breakpad.plugin] 031: libomni.ext.plugin.so!carbOnPluginPreStartup+0xe2eb ***
+2026-07-01T11:40:16Z [105,414ms] [Fatal] [carb.crashreporter-breakpad.plugin] 032: libomni.ext.plugin.so!carbOnPluginPreStartup+0xf285 ***
+2026-07-01T11:40:16Z [105,460ms] [Fatal] [carb.crashreporter-breakpad.plugin] 033: libomni.kit.app.plugin.so!void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)+0xd2a1 ***
+2026-07-01T11:40:16Z [105,508ms] [Fatal] [carb.crashreporter-breakpad.plugin] 034: libomni.kit.app.plugin.so!void std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_realloc_insert<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)+0xe167 ***
+2026-07-01T11:40:16Z [105,551ms] [Fatal] [carb.crashreporter-breakpad.plugin] 035: libomni.kit.app.plugin.so!std::__throw_regex_error(std::regex_constants::error_type, char const*)+0xc5be ***
+2026-07-01T11:40:17Z [105,596ms] [Fatal] [carb.crashreporter-breakpad.plugin] 036: _app.cpython-312-x86_64-linux-gnu.so!PyInit__app+0x367b ***
+2026-07-01T11:40:17Z [105,637ms] [Fatal] [carb.crashreporter-breakpad.plugin] 037: _app.cpython-312-x86_64-linux-gnu.so!std::vector<bool, std::allocator<bool> >::_M_fill_insert(std::_Bit_iterator, unsigned long, bool)+0x7d05 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,677ms] [Fatal] [carb.crashreporter-breakpad.plugin] 038: python!cfunction_call+0x3f ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,717ms] [Fatal] [carb.crashreporter-breakpad.plugin] 039: python!_PyEval_EvalFrameDefault+0x30e6 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,756ms] [Fatal] [carb.crashreporter-breakpad.plugin] 040: python!slot_tp_init+0x235 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,796ms] [Fatal] [carb.crashreporter-breakpad.plugin] 041: python!type_call+0xad ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,834ms] [Fatal] [carb.crashreporter-breakpad.plugin] 042: python!_PyEval_EvalFrameDefault+0x3075 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,874ms] [Fatal] [carb.crashreporter-breakpad.plugin] 043: python!slot_tp_init+0x126 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,914ms] [Fatal] [carb.crashreporter-breakpad.plugin] 044: python!type_call+0xad ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,955ms] [Fatal] [carb.crashreporter-breakpad.plugin] 045: python!_PyEval_EvalFrameDefault+0x3075 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [105,994ms] [Fatal] [carb.crashreporter-breakpad.plugin] 046: python!gen_iternext+0x7f ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,033ms] [Fatal] [carb.crashreporter-breakpad.plugin] 047: python!builtin_next+0x4d ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,071ms] [Fatal] [carb.crashreporter-breakpad.plugin] 048: python!cfunction_vectorcall_FASTCALL.llvm.13599239034337034159+0x76 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,111ms] [Fatal] [carb.crashreporter-breakpad.plugin] 049: python!_PyEval_EvalFrameDefault+0x3271 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,152ms] [Fatal] [carb.crashreporter-breakpad.plugin] 050: python!method_vectorcall.llvm.8163585355419488711+0x1b1 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,190ms] [Fatal] [carb.crashreporter-breakpad.plugin] 051: python!_PyEval_EvalFrameDefault+0xac99 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,230ms] [Fatal] [carb.crashreporter-breakpad.plugin] 052: python!_PyEval_EvalFrameDefault.cold+0x1f8b5 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,268ms] [Fatal] [carb.crashreporter-breakpad.plugin] 053: python!PyEval_EvalCode+0xde ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,308ms] [Fatal] [carb.crashreporter-breakpad.plugin] 054: python!run_mod.llvm.1674218720025423447+0x109 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,348ms] [Fatal] [carb.crashreporter-breakpad.plugin] 055: python!pyrun_file+0x85 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,387ms] [Fatal] [carb.crashreporter-breakpad.plugin] 056: python!_PyRun_SimpleFileObject+0x106 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,430ms] [Fatal] [carb.crashreporter-breakpad.plugin] 057: python!_PyRun_AnyFileObject+0x4a ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,477ms] [Fatal] [carb.crashreporter-breakpad.plugin] 058: python!pymain_run_file_obj+0xb8 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:17Z [106,518ms] [Fatal] [carb.crashreporter-breakpad.plugin] 059: python!pymain_run_file+0x5d ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:18Z [106,557ms] [Fatal] [carb.crashreporter-breakpad.plugin] 060: python!Py_RunMain.warm+0x23 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:18Z [106,596ms] [Fatal] [carb.crashreporter-breakpad.plugin] 061: python!pymain_main.llvm.815721468954410071+0x1d8 ***
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:18Z [106,636ms] [Fatal] [carb.crashreporter-breakpad.plugin] 062: python!main+0x2c ***
+2026-07-01T11:40:18Z [106,728ms] [Fatal] [carb.crashreporter-breakpad.plugin] 063: libc.so.6!__libc_init_first+0x90 (./csu/../sysdeps/nptl/libc_start_call_main.h:58)
+2026-07-01T11:40:18Z [106,819ms] [Fatal] [carb.crashreporter-breakpad.plugin] 064: libc.so.6!__libc_start_main+0x80 (./csu/../csu/libc-start.c:128)
+/usr/bin/addr2line: 'python': No such file
+2026-07-01T11:40:18Z [106,861ms] [Fatal] [carb.crashreporter-breakpad.plugin] 065: python!_start+0x29 ***
+2026-07-01T11:40:18Z [106,862ms] [Fatal] [carb.crashreporter-breakpad.plugin] [crash] NOTE: *** indicates a low-confidence frame, such as when symbols cannot be found
