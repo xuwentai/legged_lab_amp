@@ -1,8 +1,8 @@
 # 🤖 Legged Lab
 
-[![IsaacSim](https://img.shields.io/badge/IsaacSim-5.1.0-silver.svg)](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/index.html)
-[![Isaac Lab](https://img.shields.io/badge/IsaacLab-2.3.1-silver)](https://isaac-sim.github.io/IsaacLab/v2.3.1/index.html)
-[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://docs.python.org/3/whatsnew/3.11.html)
+[![IsaacSim](https://img.shields.io/badge/IsaacSim-6.0.0-silver.svg)](https://docs.isaacsim.omniverse.nvidia.com/index.html)
+[![Isaac Lab](https://img.shields.io/badge/IsaacLab-3.0.0-silver)](https://isaac-sim.github.io/IsaacLab/main/index.html)
+[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://docs.python.org/3/whatsnew/3.12.html)
 [![Linux platform](https://img.shields.io/badge/platform-linux--64-orange.svg)](https://releases.ubuntu.com/20.04/)
 [![Windows platform](https://img.shields.io/badge/platform-windows--64-orange.svg)](https://www.microsoft.com/en-us/)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
@@ -26,7 +26,7 @@
 <a id="overview"></a>
 ## 📖 Overview
 
-This repository is an extension for legged robot reinforcement learning based on Isaac Lab, which allows to develop in an isolated environment, outside of the core Isaac Lab repository. The RL algorithm is based on a [forked RSL-RL library](https://github.com/zitongbai/rsl_rl/tree/feature/amp).
+This repository is an extension for legged robot reinforcement learning based on Isaac Lab, which allows to develop in an isolated environment, outside of the core Isaac Lab repository. The RL algorithm is based on the upstream [RSL-RL library](https://github.com/leggedrobotics/rsl_rl) (`rsl-rl-lib >= 5.0.1`); the AMP algorithm is implemented as an **external module** inside this project (`legged_lab/rsl_rl/amp`), so no forked/patched `rsl_rl` is required.
 
 **Key Features:**
 
@@ -43,6 +43,7 @@ https://github.com/user-attachments/assets/ed84a8a3-f349-44ac-9cfd-2baab2265a25
 <a id="news-updates"></a>
 ## 🔥 News & Updates
 
+- 2026/07/01: Migrated to **Isaac Lab v3.0.0** and **rsl-rl-lib 5.4.1**. AMP is now an **external algorithm module** (`legged_lab/rsl_rl/amp`) selected via `class_name`, so no forked `rsl_rl` is needed.
 - 2026/02/09: Add Dockerfile + bash script workflow, including host path requirement for local `rsl_rl`.
 - 2025/12/16: Test in Isaac Lab 2.3.1 and RSL-RL 3.2.0.
 - 2025/12/05: Use git lfs to store large files, including motion data and robot models.
@@ -60,7 +61,7 @@ https://github.com/user-attachments/assets/ed84a8a3-f349-44ac-9cfd-2baab2265a25
 <a id="prerequisites"></a>
 ### Prerequisites
 
-- **Isaac Lab**: Ensure you have installed Isaac Lab `v2.3.1`. Follow the [official guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html).
+- **Isaac Lab**: Ensure you have installed Isaac Lab `v3.0.0`. Follow the [official guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html).
 - **Git LFS**: Required for downloading large model files.
 
 <a id="setup-steps"></a>
@@ -94,19 +95,26 @@ https://github.com/user-attachments/assets/ed84a8a3-f349-44ac-9cfd-2baab2265a25
     python -m pip install -e source/legged_lab
     ```
 
-4.  **Install RSL-RL (Forked Version)**
-    We use a customized version of `rsl_rl` to support advanced features like AMP.
+4.  **Install RSL-RL (Upstream)**
+    This project uses the upstream `rsl-rl-lib` (no fork required). Isaac Lab v3.0.0
+    ships with a compatible version, but AMP is developed against `5.4.1`:
 
     ```bash
-    # Clone outside of IsaacLab and legged_lab directories
-    git clone -b feature/amp https://github.com/zitongbai/rsl_rl.git
-
-    cd rsl_rl
-    python -m pip install -e .
+    python -m pip install "rsl-rl-lib>=5.0.1"
     ```
+
+    The AMP algorithm lives inside this project at `source/legged_lab/legged_lab/rsl_rl/amp`
+    and is selected at runtime via the config's `class_name`
+    (`legged_lab.rsl_rl.amp.ppo_amp:PPOAMP`) — no patching of `rsl_rl` is needed.
 
 <a id="docker-usage"></a>
 ### Docker Usage (Dockerfile + Bash Scripts)
+
+> **Note:** The Docker workflow below still targets Isaac Lab 2.3.1 and mounts a
+> local forked `rsl_rl`. Since AMP is now an in-project external module and this
+> code targets Isaac Lab v3.0.0, the Docker files (`docker/.env.base`,
+> `docker/run.sh`) need updating to the v3 base image and to drop the `rsl_rl`
+> mount. Until then, prefer the direct (non-Docker) install steps above.
 
 If you use the provided Docker workflow, the container will mount local source code and install packages automatically at startup.
 
@@ -232,11 +240,12 @@ To train the AMP algorithm, you can run the following command:
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000
 ```
 
-If you want to train it in a non-default gpu, you can pass more arguments to the command:
+If you want to train it on a non-default gpu, pass the `--device` argument
+(Isaac Lab v3 automatically keeps the agent device in sync with the sim device):
 
 ```bash
 # replace `x` with the gpu id you want to use
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000 --device cuda:x agent.device=cuda:x
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000 --device cuda:x
 ```
 
 For more details about the arguments, run `python scripts/rsl_rl/train.py -h`.
