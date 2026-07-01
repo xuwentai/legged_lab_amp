@@ -1,0 +1,265 @@
+/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/scripts/rsl_rl/train.py:5: DeprecationWarning: scripts/rsl_rl/train.py is deprecated. Use `./isaaclab.sh train --rl_library rsl_rl --task <TASK>` instead.
+  warnings.warn(
+The '--headless' CLI argument is deprecated. Omit '--viz' for default headless. If config visualizers are enabled and you want to force headless, use '--viz none'.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1782905032.063204     710 descriptor_database.cc:633] File already exists in database: grpc/health/v1/health.proto
+W0000 00:00:1782905032.064340     710 message.cc:301] Protobuf GeneratedMessageFactory: File is already registered: grpc/health/v1/health.proto
+[ISAACLAB] AppLauncher initialization complete
+Loading user config located at: '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/isaacsim/kit/data/Kit/IsaacLab/3.0/user.config.json'
+2026-07-01T11:23:50Z [0ms] [Warning] [omni.ext.plugin] [ext: isaaclab_visualizers] Extensions config 'extension.toml' doesn't exist '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_visualizers' or '/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_visualizers/config'
+2026-07-01T11:23:52Z [2,442ms] [Warning] [omni.perfmonitor.plugin]  PerfMonitorManager::onStart - error calling pthread_setaffinity_np
+2026-07-01T11:23:52Z [2,522ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-07-01T11:23:52Z [2,574ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-07-01T11:23:55Z [4,989ms] [Warning] [isaacsim.core.simulation_manager.plugin] USD stage is not available; stage-opened subscription is deferred
+2026-07-01T11:23:55Z [4,989ms] [Warning] [isaacsim.core.simulation_manager.plugin] USD stage is not available; stage-opened subscription is deferred
+2026-07-01T11:23:59Z [9,642ms] [Warning] [isaaclab_physx.physics.physx_manager] TGS solver with enable_external_forces_every_iteration=False may cause noisy velocities.
+[INFO]: Parsing configuration from: legged_lab.tasks.locomotion.velocity.config.g1.flat_env_cfg:G1FlatEnvCfg
+[INFO]: Parsing configuration from: legged_lab.tasks.locomotion.velocity.config.g1.agents.rsl_rl_ppo_cfg:G1FlatPPORunnerCfg
+[INFO] Logging experiment in directory: /mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/logs/rsl_rl/g1_flat
+Exact experiment name requested from command line: 2026-07-01_19-23-56
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Environment seed      : 42
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.02
+	Environment step-size : 0.02
+[INFO]: Registered backend 'physx' for factory Articulation.
+2026-07-01T11:23:59Z [9,904ms] [Warning] [isaaclab.terrains.terrain_importer] Visual material specified for ground plane but no diffuse color found. Using default color: (0.0, 0.0, 0.0)
+[INFO]: Registered backend 'physx' for factory FrameView.
+[INFO]: Registered backend 'physx' for factory ContactSensor.
+[INFO]: Physics scene prim path: /physicsScene
+2026-07-01T11:24:04Z [14,122ms] [Warning] [usdrt.population.plugin] Last global time was not created. Did you call setEnableUsdNoticeHandling?
+[INFO]: Time taken for scene creation Last: 2.717507 s, Mean: 2.717507 s, Std: 0.000000 s, N: 1
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 16
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Simulation parameters for joints in /World/envs/env_.*/Robot:
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                                                        Simulation Joint Information (Prim path: /World/envs/env_.*/Robot)                                                       |
++-------+----------------------------+-----------+---------+----------+-----------------+------------------+------------------+-----------------+-----------------+---------------+
+| Index | Name                       | Stiffness | Damping | Armature | Static Friction | Dynamic Friction | Viscous Friction | Position Limits | Velocity Limits | Effort Limits |
++-------+----------------------------+-----------+---------+----------+-----------------+------------------+------------------+-----------------+-----------------+---------------+
+|   0   | left_hip_pitch_joint       |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.531, 2.880] |      32.000     |     88.000    |
+|   1   | right_hip_pitch_joint      |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.531, 2.880] |      32.000     |     88.000    |
+|   2   | waist_yaw_joint            |  200.000  |  5.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.618, 2.618] |      32.000     |     88.000    |
+|   3   | left_hip_roll_joint        |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.524, 2.967] |      20.000     |    139.000    |
+|   4   | right_hip_roll_joint       |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.967, 0.524] |      20.000     |    139.000    |
+|   5   | waist_roll_joint           |   40.000  |  5.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.520, 0.520] |      37.000     |     25.000    |
+|   6   | left_hip_yaw_joint         |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.758, 2.758] |      32.000     |     88.000    |
+|   7   | right_hip_yaw_joint        |  100.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.758, 2.758] |      32.000     |     88.000    |
+|   8   | waist_pitch_joint          |   40.000  |  5.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.520, 0.520] |      37.000     |     25.000    |
+|   9   | left_knee_joint            |  150.000  |  4.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.087, 2.880] |      20.000     |    139.000    |
+|   10  | right_knee_joint           |  150.000  |  4.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.087, 2.880] |      20.000     |    139.000    |
+|   11  | left_shoulder_pitch_joint  |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-3.089, 2.670] |      37.000     |     25.000    |
+|   12  | right_shoulder_pitch_joint |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-3.089, 2.670] |      37.000     |     25.000    |
+|   13  | left_ankle_pitch_joint     |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.873, 0.524] |      37.000     |     25.000    |
+|   14  | right_ankle_pitch_joint    |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.873, 0.524] |      37.000     |     25.000    |
+|   15  | left_shoulder_roll_joint   |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.588, 2.251] |      37.000     |     25.000    |
+|   16  | right_shoulder_roll_joint  |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.251, 1.588] |      37.000     |     25.000    |
+|   17  | left_ankle_roll_joint      |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.262, 0.262] |      37.000     |     25.000    |
+|   18  | right_ankle_roll_joint     |   40.000  |  2.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-0.262, 0.262] |      37.000     |     25.000    |
+|   19  | left_shoulder_yaw_joint    |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.618, 2.618] |      37.000     |     25.000    |
+|   20  | right_shoulder_yaw_joint   |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-2.618, 2.618] |      37.000     |     25.000    |
+|   21  | left_elbow_joint           |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.047, 2.094] |      37.000     |     25.000    |
+|   22  | right_elbow_joint          |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.047, 2.094] |      37.000     |     25.000    |
+|   23  | left_wrist_roll_joint      |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.972, 1.972] |      37.000     |     25.000    |
+|   24  | right_wrist_roll_joint     |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.972, 1.972] |      37.000     |     25.000    |
+|   25  | left_wrist_pitch_joint     |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
+|   26  | right_wrist_pitch_joint    |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
+|   27  | left_wrist_yaw_joint       |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
+|   28  | right_wrist_yaw_joint      |   40.000  |  1.000  |  0.010   |      0.000      |      0.000       |      0.000       | [-1.614, 1.614] |      22.000     |     5.000     |
++-------+----------------------------+-----------+---------+----------+-----------------+------------------+------------------+-----------------+-----------------+---------------+
+[INFO]: Time taken for simulation start Last: 2.165689 s, Mean: 2.165689 s, Std: 0.000000 s, N: 1
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Event Manager:  <EventManager> contains 3 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
+|    1     | add_base_mass             |
+|    2     | base_com                  |
++----------+---------------------------+
++---------------------------------------+
+|  Active Event Terms in Mode: 'reset'  |
++--------+------------------------------+
+| Index  | Name                         |
++--------+------------------------------+
+|   0    | base_external_force_torque   |
+|   1    | reset_base                   |
+|   2    | reset_robot_joints           |
++--------+------------------------------+
++----------------------------------------------+
+|    Active Event Terms in Mode: 'interval'    |
++-------+------------+-------------------------+
+| Index | Name       | Interval time range (s) |
++-------+------------+-------------------------+
+|   0   | push_robot |       (10.0, 15.0)      |
++-------+------------+-------------------------+
+
+[INFO] Recorder Manager:  <RecorderManager> contains 0 active terms.
++---------------------+
+| Active Recorder Terms |
++-----------+---------+
+|   Index   | Name    |
++-----------+---------+
++-----------+---------+
+
+[INFO]: Resolved joint names for the action term JointPositionAction: ['left_hip_pitch_joint', 'right_hip_pitch_joint', 'waist_yaw_joint', 'left_hip_roll_joint', 'right_hip_roll_joint', 'waist_roll_joint', 'left_hip_yaw_joint', 'right_hip_yaw_joint', 'waist_pitch_joint', 'left_knee_joint', 'right_knee_joint', 'left_shoulder_pitch_joint', 'right_shoulder_pitch_joint', 'left_ankle_pitch_joint', 'right_ankle_pitch_joint', 'left_shoulder_roll_joint', 'right_shoulder_roll_joint', 'left_ankle_roll_joint', 'right_ankle_roll_joint', 'left_shoulder_yaw_joint', 'right_shoulder_yaw_joint', 'left_elbow_joint', 'right_elbow_joint', 'left_wrist_roll_joint', 'right_wrist_roll_joint', 'left_wrist_pitch_joint', 'right_wrist_pitch_joint', 'left_wrist_yaw_joint', 'right_wrist_yaw_joint'] [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]]
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_tasks/isaaclab_tasks/utils/sim_launcher.py", line 499, in launch_simulation
+    yield
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/scripts/rsl_rl/train.py", line 209, in main
+    runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/rsl_rl/runners/on_policy_runner.py", line 87, in learn
+    obs, rewards, dones, extras = self.env.step(actions.to(self.env.device))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab_rl/isaaclab_rl/rsl_rl/vecenv_wrapper.py", line 185, in step
+    obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/gymnasium/wrappers/common.py", line 393, in step
+    return super().step(action)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/gymnasium/core.py", line 327, in step
+    return self.env.step(action)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab/isaaclab/envs/manager_based_rl_env.py", line 240, in step
+    self.reward_buf = self.reward_manager.compute(dt=self.step_dt)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/isaaclab/v3.0.0-beta2/IsaacLab/source/isaaclab/isaaclab/managers/reward_manager.py", line 150, in compute
+    value = term_cfg.func(self._env, **term_cfg.params) * term_cfg.weight * dt
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/source/legged_lab/legged_lab/tasks/locomotion/velocity/mdp/rewards.py", line 118, in track_lin_vel_xy_yaw_frame_exp
+    vel_yaw = quat_apply_inverse(yaw_quat(asset.data.root_quat_w), asset.data.root_lin_vel_w[:, :3])
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: yaw_quat() Expected a value of type 'Tensor' for argument 'quat' but instead found type 'ProxyArray'.
+Position: 0
+Value: ProxyArray(shape=(16,), dtype=<class 'warp._src.types.quatf'>, device=cuda:0)
+Declaration: yaw_quat(Tensor quat) -> Tensor
+Cast error details: Unable to cast ProxyArray(shape=(16,), dtype=<class 'warp._src.types.quatf'>, device=cuda:0) to Tensor
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 29)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          29 |
++--------+-------------+-------------+
+
+[INFO] Observation Manager: <ObservationManager> contains 2 groups.
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (480,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_ang_vel                   |    (15,)    |
+|     1     | projected_gravity              |    (15,)    |
+|     2     | velocity_commands              |    (15,)    |
+|     3     | joint_pos                      |    (145,)   |
+|     4     | joint_vel                      |    (145,)   |
+|     5     | actions                        |    (145,)   |
++-----------+--------------------------------+-------------+
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'critic' (shape: (495,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_lin_vel                   |    (15,)    |
+|     1     | base_ang_vel                   |    (15,)    |
+|     2     | projected_gravity              |    (15,)    |
+|     3     | velocity_commands              |    (15,)    |
+|     4     | joint_pos                      |    (145,)   |
+|     5     | joint_vel                      |    (145,)   |
+|     6     | actions                        |    (145,)   |
++-----------+--------------------------------+-------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 4 active terms.
++----------------------------------------------+
+|           Active Termination Terms           |
++-------+---------------------------+----------+
+| Index | Name                      | Time Out |
++-------+---------------------------+----------+
+|   0   | time_out                  |   True   |
+|   1   | base_contact              |  False   |
+|   2   | bad_orientation           |  False   |
+|   3   | root_height_below_minimum |  False   |
++-------+---------------------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 17 active terms.
++-------------------------------------------------+
+|               Active Reward Terms               |
++-------+--------------------------------+--------+
+| Index | Name                           | Weight |
++-------+--------------------------------+--------+
+|   0   | termination_penalty            | -200.0 |
+|   1   | track_lin_vel_xy_exp           |    1.0 |
+|   2   | track_ang_vel_z_exp            |    1.0 |
+|   3   | flat_orientation_l2            |   -5.0 |
+|   4   | lin_vel_z_l2                   |   -0.2 |
+|   5   | ang_vel_xy_l2                  |  -0.05 |
+|   6   | joint_torques_l2               | -2e-06 |
+|   7   | joint_acc_l2                   | -1e-07 |
+|   8   | action_rate_l2                 | -0.005 |
+|   9   | dof_pos_limits                 |   -1.0 |
+|   10  | feet_air_time                  |   0.75 |
+|   11  | feet_slide                     |   -0.1 |
+|   12  | feet_clearance                 |    1.0 |
+|   13  | joint_deviation_hip            |   -0.1 |
+|   14  | joint_deviation_arms           |   -0.1 |
+|   15  | joint_deviation_waist          |   -0.1 |
+|   16  | stand_still_joint_deviation_l1 |   -0.5 |
++-------+--------------------------------+--------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+[INFO]: Completed setting up the environment...
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['policy']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): Identity()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=480, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=128, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=128, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=29, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): Identity()
+  (mlp): MLP(
+    (0): Linear(in_features=480, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=128, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=128, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+Could not find git repository in /mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/lab3-beta2/lib/python3.12/site-packages/rsl_rl/__init__.py. Skipping.
+Storing git diff for 'feature+v3-migration' in: /mnt/dolphinfs/ssd_pool/docker/user/hadoop-aipnlp/EVA/baizitong/projects/lab_dev/legged_lab/.claude/worktrees/feature+v3-migration/logs/rsl_rl/g1_flat/2026-07-01_19-23-56/git/feature+v3-migration.diff

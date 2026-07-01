@@ -22,7 +22,7 @@ def ref_track_quat_error_exp(
     robot: Articulation = env.scene[asset_cfg.name]
     animation_term: AnimationTerm = env.animation_manager.get_term(animation)
 
-    root_quat = robot.data.root_quat_w  # (N, 4)
+    root_quat = robot.data.root_quat_w.torch  # v3: ProxyArray -> Tensor; shape (N, 4)
     ref_root_quat = animation_term.get_root_quat()[:, 0, :]  # (N, 4)
 
     err = math_utils.quat_error_magnitude(root_quat, ref_root_quat)  # (N,)
@@ -89,7 +89,7 @@ def ref_track_key_body_pos_b_error_exp(
 
     key_body_pos_w = robot.data.body_pos_w[:, asset_cfg.body_ids, :]  # shape: (num_envs, M, 3)
     root_pos_w = robot.data.root_pos_w  # shape: (num_envs, 3).
-    root_quat = robot.data.root_quat_w  # shape: (num_envs, 4), w, x, y, z order.
+    root_quat = robot.data.root_quat_w.torch  # v3: ProxyArray -> Tensor; shape (num_envs, 4)
 
     num_key_bodies = key_body_pos_w.shape[1]
     key_body_pos_b = math_utils.quat_apply_inverse(

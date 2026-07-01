@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 def root_rot_tan_norm(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     robot: Articulation = env.scene[asset_cfg.name]
 
-    root_quat = robot.data.root_quat_w
+    root_quat = robot.data.root_quat_w.torch  # v3: ProxyArray -> Tensor
     root_rotm = math_utils.matrix_from_quat(root_quat)
 
     # use the first and last column of the rotation matrix as the tangent and normal vectors
@@ -37,7 +37,7 @@ def key_body_pos_b(
 
     key_body_pos_w = robot.data.body_pos_w[:, asset_cfg.body_ids, :]  # shape: (num_envs, M, 3)
     root_pos_w = robot.data.root_pos_w  # shape: (num_envs, 3).
-    root_quat = robot.data.root_quat_w  # shape: (num_envs, 4), w, x, y, z order.
+    root_quat = robot.data.root_quat_w.torch  # v3: ProxyArray -> Tensor; shape (num_envs, 4)
 
     num_key_bodies = key_body_pos_w.shape[1]
     num_envs = root_pos_w.shape[0]

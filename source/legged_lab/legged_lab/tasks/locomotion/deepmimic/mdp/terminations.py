@@ -40,7 +40,7 @@ def deviation_key_body_pos_b(
 
     key_body_pos_w = robot.data.body_pos_w[:, asset_cfg.body_ids, :]  # shape: (num_envs, M, 3)
     root_pos_w = robot.data.root_pos_w  # shape: (num_envs, 3).
-    root_quat = robot.data.root_quat_w  # shape: (num_envs, 4), w, x, y, z order.
+    root_quat = robot.data.root_quat_w.torch  # v3: ProxyArray -> Tensor; shape (num_envs, 4)
 
     num_key_bodies = key_body_pos_w.shape[1]
 

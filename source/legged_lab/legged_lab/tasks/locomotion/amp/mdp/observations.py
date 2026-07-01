@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 def root_local_rot_tan_norm(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     robot: Articulation = env.scene[asset_cfg.name]
 
-    root_quat = robot.data.root_quat_w
+    root_quat = robot.data.root_quat_w.torch  # v3: ProxyArray -> Tensor for @jit.script fns
     yaw_quat = math_utils.yaw_quat(root_quat)
 
     root_quat_local = math_utils.quat_mul(math_utils.quat_conjugate(yaw_quat), root_quat)
