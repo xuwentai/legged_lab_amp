@@ -1,7 +1,7 @@
 # 🤖 Legged Lab
 
 [![IsaacSim](https://img.shields.io/badge/IsaacSim-5.1.0-silver.svg)](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/index.html)
-[![Isaac Lab](https://img.shields.io/badge/IsaacLab-2.3.1-silver)](https://isaac-sim.github.io/IsaacLab/v2.3.1/index.html)
+[![Isaac Lab](https://img.shields.io/badge/IsaacLab-2.3.2-silver)](https://isaac-sim.github.io/IsaacLab/v2.3.2/index.html)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://docs.python.org/3/whatsnew/3.11.html)
 [![Linux platform](https://img.shields.io/badge/platform-linux--64-orange.svg)](https://releases.ubuntu.com/20.04/)
 [![Windows platform](https://img.shields.io/badge/platform-windows--64-orange.svg)](https://www.microsoft.com/en-us/)
@@ -43,6 +43,7 @@ https://github.com/user-attachments/assets/ed84a8a3-f349-44ac-9cfd-2baab2265a25
 <a id="news-updates"></a>
 ## 🔥 News & Updates
 
+- 2026/06/30: Adapt to Isaac Lab v2.3.2. Fix `pretrained_checkpoint` import path (`isaaclab.utils` → `isaaclab_rl.utils`).
 - 2026/02/09: Add Dockerfile + bash script workflow, including host path requirement for local `rsl_rl`.
 - 2025/12/16: Test in Isaac Lab 2.3.1 and RSL-RL 3.2.0.
 - 2025/12/05: Use git lfs to store large files, including motion data and robot models.
@@ -60,7 +61,7 @@ https://github.com/user-attachments/assets/ed84a8a3-f349-44ac-9cfd-2baab2265a25
 <a id="prerequisites"></a>
 ### Prerequisites
 
-- **Isaac Lab**: Ensure you have installed Isaac Lab `v2.3.1`. Follow the [official guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html).
+- **Isaac Lab**: Ensure you have installed Isaac Lab `v2.3.2`. Follow the [official guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html).
 - **Git LFS**: Required for downloading large model files.
 
 <a id="setup-steps"></a>
