@@ -73,7 +73,18 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
         return None
 
     def load_managers(self):
-        """Load AMP-specific managers while swapping in the local preview observation manager."""
+        """Load AMP-specific managers while swapping in the local preview observation manager.
+
+        Note:
+            This method is a full reimplementation of the entire parent chain
+            (``ManagerBasedEnv`` → ``ManagerBasedRLEnv`` → ``ManagerBasedAnimationEnv``) in order
+            to substitute :class:`PreviewObservationManager` for the default
+            :class:`~isaaclab.managers.ObservationManager`. The manager creation order must be
+            preserved for correctness (animation managers before command/obs, obs before spaces).
+
+            When upgrading IsaacLab, diff this method against the ``load_managers`` implementations
+            in all three parent classes to catch any upstream additions or reorderings.
+        """
         self.motion_data_manager = MotionDataManager(self.cfg.motion_data, self)
         print("[INFO] Motion Data Manager: ", self.motion_data_manager)
         self.animation_manager = AnimationManager(self.cfg.animation, self)
@@ -105,15 +116,36 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
     def step(self, action: torch.Tensor) -> VecEnvStepReturn:
         """Step the environment and expose terminal observations in ``extras``.
 
-        This follows the parent implementation closely, but captures a non-mutating preview of the
-        observations before reset and merges those values back for terminated environments into
-        ``extras["terminal_obs"]``. The main ``obs`` return value keeps the normal post-reset semantics.
+        This follows the parent :meth:`ManagerBasedAnimationEnv.step` implementation closely, but
+        captures a non-mutating preview of the observations before reset and merges those values
+        back for terminated environments into ``extras["terminal_obs"]``. The main ``obs`` return
+        value keeps the normal post-reset semantics.
+
+        Rendering can be controlled per-step via :attr:`render_enabled`.
+
+        When ``render_enabled`` is False:
+
+        - The Kit app loop (``app.update()``) is **skipped**, which also disables
+          camera/RTX sensor rendering and GUI viewport updates.  Kit bundles these
+          operations together, so they cannot be separated.
+        - Standalone visualizers (Newton, Rerun, Viser) **continue to update**
+          normally because their ``step()`` methods are independent of the Kit
+          app loop.
+        - Post-reset re-renders for RTX sensors are also skipped.
 
         Args:
             action: Actions to apply on the environment. Shape is ``(num_envs, action_dim)``.
 
         Returns:
             Observations, rewards, terminated flags, timeout flags, and extras.
+
+        Note:
+            This method is a copy of :meth:`ManagerBasedAnimationEnv.step` with the terminal
+            observation preview/merge logic inserted around the reset block. The base class does
+            not expose a hook for this injection point, so a full override is necessary.
+
+            When upgrading IsaacLab, diff this method against :meth:`ManagerBasedAnimationEnv.step`
+            to catch any upstream changes.
         """
         # process actions
         self.action_manager.process_action(action.to(self.device))
@@ -121,7 +153,7 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
         self.recorder_manager.record_pre_step()
 
         # check if we need to do rendering within the physics loop
-        # note: uses cached property to avoid settings lookup every step (v3 API)
+        # note: uses cached property to avoid settings lookup every step
         is_rendering = self.sim.is_rendering
 
         # perform physics stepping
@@ -131,6 +163,8 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
             self.scene.write_data_to_sim()
             self.sim.step(render=False)
             self.recorder_manager.record_post_physics_decimation_step()
+            # render only when a render_interval boundary falls within this decimation block,
+            # mirroring the per-sub-step check in the else branch.
             if self._sim_step_counter % self.cfg.sim.render_interval == 0 and is_rendering:
                 self.sim.render(skip_app_pumping=not self.render_enabled)
             self.scene.update(dt=self.step_dt)
@@ -144,7 +178,9 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
                 # simulate
                 self.sim.step(render=False)
                 self.recorder_manager.record_post_physics_decimation_step()
-                # render between steps only if the GUI or an RTX sensor needs it
+                # render between steps only if the GUI or an RTX sensor needs it.
+                # When render_enabled is False, Kit visualizer (camera/GUI) is skipped
+                # but standalone visualizers (Newton, Rerun, Viser) still update.
                 if self._sim_step_counter % self.cfg.sim.render_interval == 0 and is_rendering:
                     self.sim.render(skip_app_pumping=not self.render_enabled)
                 # update buffers at sim dt

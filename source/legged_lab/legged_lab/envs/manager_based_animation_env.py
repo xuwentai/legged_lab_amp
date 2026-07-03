@@ -31,16 +31,38 @@ class ManagerBasedAnimationEnv(ManagerBasedRLEnv):
         1. Process the actions.
         2. Perform physics stepping.
         3. Perform rendering if gui is enabled.
-        4. Update the environment counters and compute the rewards and terminations.
-        5. Reset the environments that terminated.
-        6. Compute the observations.
-        7. Return the observations, rewards, resets and extras.
+        4. Update the animation manager.
+        5. Update the environment counters and compute the rewards and terminations.
+        6. Reset the environments that terminated.
+        7. Compute the observations.
+        8. Return the observations, rewards, resets and extras.
+
+        Rendering can be controlled per-step via :attr:`render_enabled`.
+
+        When ``render_enabled`` is False:
+
+        - The Kit app loop (``app.update()``) is **skipped**, which also disables
+          camera/RTX sensor rendering and GUI viewport updates.  Kit bundles these
+          operations together, so they cannot be separated.
+        - Standalone visualizers (Newton, Rerun, Viser) **continue to update**
+          normally because their ``step()`` methods are independent of the Kit
+          app loop.
+        - Post-reset re-renders for RTX sensors are also skipped.
 
         Args:
             action: The actions to apply on the environment. Shape is (num_envs, action_dim).
 
         Returns:
             A tuple containing the observations, rewards, resets (terminated and truncated) and extras.
+
+        Note:
+            This method is a copy of :meth:`ManagerBasedRLEnv.step` with a single addition:
+            ``self.animation_manager.update(dt=self.step_dt)`` injected after the physics loop
+            and before termination/reward computation. The base class does not expose a hook for
+            this injection point, so a full override is necessary.
+
+            When upgrading IsaacLab, diff this method against :meth:`ManagerBasedRLEnv.step`
+            to catch any upstream changes.
         """
         # process actions
         self.action_manager.process_action(action.to(self.device))
@@ -48,7 +70,7 @@ class ManagerBasedAnimationEnv(ManagerBasedRLEnv):
         self.recorder_manager.record_pre_step()
 
         # check if we need to do rendering within the physics loop
-        # note: uses cached property to avoid settings lookup every step (v3 API)
+        # note: uses cached property to avoid settings lookup every step
         is_rendering = self.sim.is_rendering
 
         # perform physics stepping
@@ -58,6 +80,8 @@ class ManagerBasedAnimationEnv(ManagerBasedRLEnv):
             self.scene.write_data_to_sim()
             self.sim.step(render=False)
             self.recorder_manager.record_post_physics_decimation_step()
+            # render only when a render_interval boundary falls within this decimation block,
+            # mirroring the per-sub-step check in the else branch.
             if self._sim_step_counter % self.cfg.sim.render_interval == 0 and is_rendering:
                 self.sim.render(skip_app_pumping=not self.render_enabled)
             self.scene.update(dt=self.step_dt)
@@ -71,7 +95,9 @@ class ManagerBasedAnimationEnv(ManagerBasedRLEnv):
                 # simulate
                 self.sim.step(render=False)
                 self.recorder_manager.record_post_physics_decimation_step()
-                # render between steps only if the GUI or an RTX sensor needs it
+                # render between steps only if the GUI or an RTX sensor needs it.
+                # When render_enabled is False, Kit visualizer (camera/GUI) is skipped
+                # but standalone visualizers (Newton, Rerun, Viser) still update.
                 if self._sim_step_counter % self.cfg.sim.render_interval == 0 and is_rendering:
                     self.sim.render(skip_app_pumping=not self.render_enabled)
                 # update buffers at sim dt
