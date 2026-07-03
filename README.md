@@ -212,6 +212,14 @@ To train the DeepMimic algorithm, you can run the following command:
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac--Deepmimic-G1-v0 --headless --max_iterations 50000
 ```
 
+To train on a non-default GPU, set both `--device` and `agent.device`:
+
+```bash
+# replace `x` with the gpu id you want to use
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac--Deepmimic-G1-v0 --headless --max_iterations 50000 \
+    --device cuda:x agent.device=cuda:x
+```
+
 The `max_iterations` can be adjusted based on your needs. For more details about the arguments, run `python scripts/rsl_rl/train.py -h`.
 
 </details>
@@ -240,12 +248,12 @@ To train the AMP algorithm, you can run the following command:
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000
 ```
 
-If you want to train it on a non-default gpu, pass the `--device` argument
-(Isaac Lab v3 automatically keeps the agent device in sync with the sim device):
+To train on a non-default GPU, set both `--device` and `agent.device`:
 
 ```bash
 # replace `x` with the gpu id you want to use
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000 --device cuda:x
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000 \
+    --device cuda:x agent.device=cuda:x
 ```
 
 For more details about the arguments, run `python scripts/rsl_rl/train.py -h`.

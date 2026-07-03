@@ -44,6 +44,9 @@ _build
 .codex/env.local.sh
 .agents/.local.env
 
+# Batch experiment machine-local config
+scripts/experiments/env.local.sh
+
 # smoke test logs (local only)
 smoke_test_logs/
 logs/
