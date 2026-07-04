@@ -1,6 +1,9 @@
 import math
 from dataclasses import MISSING
 
+from isaaclab_newton.physics import MJWarpSolverCfg, NewtonCfg, NewtonCollisionPipelineCfg, NewtonShapeCfg
+from isaaclab_physx.physics import PhysxCfg
+
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
 from isaaclab.managers import EventTermCfg as EventTerm
@@ -11,6 +14,7 @@ from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sensors import ContactSensorCfg
+from isaaclab.sim import SimulationCfg
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils.configclass import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
@@ -20,6 +24,46 @@ import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab.envs.manager_based_amp_env_cfg import ManagerBasedAmpEnvCfg
 from legged_lab.managers import AnimationTermCfg as AnimTerm
 from legged_lab.managers import MotionDataTermCfg as MotionDataTerm
+from isaaclab_tasks.utils import PresetCfg
+
+
+##
+# Physics presets
+##
+
+
+@configclass
+class AmpRoughPhysicsCfg(PresetCfg):
+    """Multi-backend physics preset for the AMP locomotion env.
+
+    Adapted (copied) from IsaacLab v3.0.0-beta2 official velocity example:
+    ``isaaclab_tasks.manager_based.locomotion.velocity.velocity_env_cfg.RoughPhysicsCfg``.
+    Kept as a local copy (rather than importing from the velocity package) so the AMP
+    task stays self-contained. The ``default`` field reproduces the exact PhysX config
+    that AMP previously set lazily in ``__post_init__``, so default (PhysX) training
+    behavior is unchanged. The ``newton_mjwarp`` field is provided for future rough /
+    Newton work and is only selected via the ``presets=newton_mjwarp`` CLI override.
+    """
+
+    default = PhysxCfg(gpu_max_rigid_patch_count=10 * 2**15)
+    newton_mjwarp = NewtonCfg(
+        solver_cfg=MJWarpSolverCfg(
+            njmax=200,
+            nconmax=100,
+            cone="pyramidal",
+            impratio=1.0,
+            integrator="implicitfast",
+            use_mujoco_contacts=False,
+        ),
+        collision_cfg=NewtonCollisionPipelineCfg(max_triangle_pairs=2_500_000),
+        num_substeps=1,
+        debug_mode=False,
+        # 1 cm shape margin is the single most important Newton setting for rough
+        # terrain — without it, non-Anymal-D robots fail to learn stable contact
+        # on triangle-mesh terrain. See isaaclab_newton 0.5.22 changelog.
+        default_shape_cfg=NewtonShapeCfg(margin=0.01),
+    )
+    physx = default
 
 
 @configclass
@@ -372,6 +416,8 @@ class AnimationCfg:
 class LocomotionAmpEnvCfg(ManagerBasedAmpEnvCfg):
     """Configuration for the AMP locomotion environment."""
 
+    # Simulation settings — shared multi-backend physics preset (PhysX default + Newton MJWarp)
+    sim: SimulationCfg = SimulationCfg(physics=AmpRoughPhysicsCfg())
     # scene
     scene: AmpSceneCfg = AmpSceneCfg(num_envs=4096, env_spacing=2.5)
     # Basic settings
@@ -397,9 +443,6 @@ class LocomotionAmpEnvCfg(ManagerBasedAmpEnvCfg):
         self.sim.dt = 0.005
         self.sim.render_interval = self.decimation
         self.sim.physics_material = self.scene.terrain.physics_material
-        from isaaclab_physx.physics import PhysxCfg  # lazy: defer pxr load until after SimulationApp starts
-
-        self.sim.physics = PhysxCfg(gpu_max_rigid_patch_count=10 * 2**15)
         # update sensor update periods
         # we tick all the sensors based on the smallest update period (physics update period)
         if self.scene.contact_forces is not None:

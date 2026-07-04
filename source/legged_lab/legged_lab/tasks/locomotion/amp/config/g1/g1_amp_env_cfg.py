@@ -33,18 +33,26 @@ class G1AmpRewards:
 
     # -- task
     track_lin_vel_xy_exp = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_lin_vel_xy_yaw_frame_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.5}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
+        func=mdp.track_ang_vel_z_world_exp, weight=2.0, params={"command_name": "base_velocity", "std": 0.5}
     )
 
     # -- penalties
     flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.2)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-2.0e-6)
-    dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-1.0e-7)
+    dof_torques_l2 = RewTerm(
+        func=mdp.joint_torques_l2,
+        weight=-2.0e-6,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"])},
+    )
+    dof_acc_l2 = RewTerm(
+        func=mdp.joint_acc_l2,
+        weight=-1.0e-7,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint"])},
+    )
     action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
@@ -102,7 +110,7 @@ class G1AmpRewards:
         },
     )
 
-    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-50.0)
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
 
 @configclass
@@ -212,12 +220,6 @@ class G1AmpEnvCfg(LocomotionAmpEnvCfg):
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # ------------------------------------------------------
-        # Curriculum
-        # ------------------------------------------------------
-        self.curriculum.lin_vel_cmd_levels = None
-        self.curriculum.ang_vel_cmd_levels = None
-
-        # ------------------------------------------------------
         # terminations
         # ------------------------------------------------------
         self.terminations.base_contact = None
@@ -235,5 +237,10 @@ class G1AmpEnvCfg_PLAY(G1AmpEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
         self.commands.base_velocity.ranges.heading = (0.0, 0.0)
+
+        # disable randomization for play
+        self.observations.policy.enable_corruption = False
+        # remove random pushing
+        self.events.push_robot = None
 
         self.events.reset_from_ref = None
