@@ -242,7 +242,11 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # terminations
         # ------------------------------------------------------
-        self.terminations.base_contact = None
+        # Fall-recovery fallback: terminate on torso contact (matches the official G1
+        # velocity rough config, which uses illegal_contact on torso_link). torso_link
+        # has a large torso/head collision mesh high on the body, so normal gait never
+        # touches it — only a real fall does. This replaces the removed base_height term.
+        self.terminations.base_contact.params["sensor_cfg"].body_names = "torso_link"
 
 
 @configclass
