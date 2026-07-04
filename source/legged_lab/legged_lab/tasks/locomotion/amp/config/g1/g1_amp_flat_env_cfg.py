@@ -1,7 +1,5 @@
-from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.utils.configclass import configclass
 
-import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab.tasks.locomotion.amp.config.g1.g1_amp_rough_env_cfg import (
     G1AmpRoughEnvCfg,
     G1AmpRoughEnvCfg_PLAY,
@@ -37,12 +35,6 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
             "height_offset": 0.1,
             "align_xy_to_origin": False,
         }
-        # base_height termination is valid again on flat ground (the rough base disabled
-        # it because absolute world-z misfires as the generator ground rises). Rebuild the
-        # term — it was set to None upstream, so we can't just mutate its params.
-        self.terminations.base_height = DoneTerm(
-            func=mdp.root_height_below_minimum, params={"minimum_height": 0.2}
-        )
         # TODO(milestone B): when the rough base adds height_scanner + height_scan obs and
         #   the terrain_levels curriculum, null them here:
         #     self.scene.height_scanner = None

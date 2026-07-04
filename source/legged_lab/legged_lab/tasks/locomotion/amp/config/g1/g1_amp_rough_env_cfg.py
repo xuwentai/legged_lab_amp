@@ -243,10 +243,6 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # terminations
         # ------------------------------------------------------
         self.terminations.base_contact = None
-        # base_height uses absolute world-z (flat-terrain only); on generator terrain it
-        # would misfire as the ground rises. Disable it here — bad_orientation (60°) still
-        # catches falls. Milestone B may replace it with a terrain-relative variant.
-        self.terminations.base_height = None
 
 
 @configclass
