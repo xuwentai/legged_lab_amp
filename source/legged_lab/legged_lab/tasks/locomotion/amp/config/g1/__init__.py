@@ -3,12 +3,61 @@ import gymnasium as gym
 
 from . import agents
 
+##
+# Register Gym environments.
+##
+
+# -- Rough terrain (base config) ---------------------------------------------
+gym.register(
+    id="LeggedLab-Isaac-AMP-Rough-G1-v0",
+    entry_point="legged_lab.envs:ManagerBasedAmpEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.g1_amp_rough_env_cfg:G1AmpRoughEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1RslRlOnPolicyRunnerAmpCfg",
+    },
+)
+
+gym.register(
+    id="LeggedLab-Isaac-AMP-Rough-G1-Play-v0",
+    entry_point="legged_lab.envs:ManagerBasedAmpEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.g1_amp_rough_env_cfg:G1AmpRoughEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1RslRlOnPolicyRunnerAmpCfg",
+    },
+)
+
+# -- Flat terrain (derived config) -------------------------------------------
+gym.register(
+    id="LeggedLab-Isaac-AMP-Flat-G1-v0",
+    entry_point="legged_lab.envs:ManagerBasedAmpEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.g1_amp_flat_env_cfg:G1AmpFlatEnvCfg",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1RslRlOnPolicyRunnerAmpCfg",
+    },
+)
+
+gym.register(
+    id="LeggedLab-Isaac-AMP-Flat-G1-Play-v0",
+    entry_point="legged_lab.envs:ManagerBasedAmpEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": f"{__name__}.g1_amp_flat_env_cfg:G1AmpFlatEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1RslRlOnPolicyRunnerAmpCfg",
+    },
+)
+
+# -- Backward-compatible aliases (old id -> flat config) ---------------------
+# The original task was flat; keep these ids pointing at the flat config so existing
+# training/play scripts keep working. Prefer the explicit -Flat-/-Rough- ids above.
 gym.register(
     id="LeggedLab-Isaac-AMP-G1-v0",
     entry_point="legged_lab.envs:ManagerBasedAmpEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.g1_amp_env_cfg:G1AmpEnvCfg",
+        "env_cfg_entry_point": f"{__name__}.g1_amp_flat_env_cfg:G1AmpFlatEnvCfg",
         "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1RslRlOnPolicyRunnerAmpCfg",
     },
 )
@@ -18,7 +67,7 @@ gym.register(
     entry_point="legged_lab.envs:ManagerBasedAmpEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.g1_amp_env_cfg:G1AmpEnvCfg_PLAY",
+        "env_cfg_entry_point": f"{__name__}.g1_amp_flat_env_cfg:G1AmpFlatEnvCfg_PLAY",
         "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1RslRlOnPolicyRunnerAmpCfg",
     },
 )

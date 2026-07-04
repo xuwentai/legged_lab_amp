@@ -1,0 +1,276 @@
+import math
+import os
+
+from isaaclab.managers import RewardTermCfg as RewTerm
+from isaaclab.managers import SceneEntityCfg
+from isaaclab.utils.configclass import configclass
+
+import legged_lab.tasks.locomotion.amp.mdp as mdp
+from legged_lab import LEGGED_LAB_ROOT_DIR
+
+##
+# Pre-defined configs
+##
+from legged_lab.assets.unitree import UNITREE_G1_29DOF_CFG
+from legged_lab.tasks.locomotion.amp.amp_env_cfg import LocomotionAmpEnvCfg
+from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
+
+# The order must align with the retarget config file scripts/tools/retarget/config/g1_29dof.yaml
+KEY_BODY_NAMES = [
+    "left_ankle_roll_link",
+    "right_ankle_roll_link",
+    "left_wrist_yaw_link",
+    "right_wrist_yaw_link",
+    "left_shoulder_roll_link",
+    "right_shoulder_roll_link",
+]  # if changed here and symmetry is enabled, remember to update amp.mdp.symmetry.g1 as well!
+ANIMATION_TERM_NAME = "animation"
+AMP_NUM_STEPS = 4
+
+
+@configclass
+class G1AmpRewards:
+    """Reward terms for the MDP."""
+
+    # -- task
+    track_lin_vel_xy_exp = RewTerm(
+        func=mdp.track_lin_vel_xy_yaw_frame_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.5}
+    )
+    track_ang_vel_z_exp = RewTerm(
+        func=mdp.track_ang_vel_z_world_exp, weight=2.0, params={"command_name": "base_velocity", "std": 0.5}
+    )
+
+    # -- penalties
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
+    lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.2)
+    ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
+    dof_torques_l2 = RewTerm(
+        func=mdp.joint_torques_l2,
+        weight=-2.0e-6,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint", ".*_ankle_.*"])},
+    )
+    dof_acc_l2 = RewTerm(
+        func=mdp.joint_acc_l2,
+        weight=-1.0e-7,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_.*", ".*_knee_joint"])},
+    )
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.005)
+    dof_pos_limits = RewTerm(
+        func=mdp.joint_pos_limits,
+        weight=-1.0,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_ankle_pitch_joint", ".*_ankle_roll_joint"])},
+    )
+
+    joint_deviation_hip = RewTerm(
+        func=mdp.stand_still_joint_deviation_l1,
+        weight=-0.1,
+        params={
+            "command_name": "base_velocity",
+            "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint"]),
+        },
+    )
+    joint_deviation_arms = RewTerm(
+        func=mdp.stand_still_joint_deviation_l1,
+        weight=-0.05,
+        params={
+            "command_name": "base_velocity",
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                joint_names=[
+                    ".*_shoulder_.*_joint",
+                    ".*_elbow_joint",
+                    ".*_wrist_.*_joint",
+                ],
+            ),
+        },
+    )
+    joint_deviation_waist = RewTerm(
+        func=mdp.stand_still_joint_deviation_l1,
+        weight=-0.1,
+        params={
+            "command_name": "base_velocity",
+            "asset_cfg": SceneEntityCfg("robot", joint_names="waist_.*_joint"),
+        },
+    )
+
+    feet_air_time = RewTerm(
+        func=mdp.feet_air_time_positive_biped,
+        weight=0.5,
+        params={
+            "command_name": "base_velocity",
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "threshold": 0.4,
+        },
+    )
+    feet_slide = RewTerm(
+        func=mdp.feet_slide,
+        weight=-0.1,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
+        },
+    )
+
+    termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
+
+
+@configclass
+class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
+    """Configuration for the G1 AMP environment on rough (generator) terrain.
+
+    This is the base config for the G1 AMP task family; ``G1AmpFlatEnvCfg`` inherits
+    from it and strips the rough-only pieces (mirrors the official IsaacLab velocity
+    example, where ``flat_env_cfg`` derives from ``rough_env_cfg``).
+
+    Milestone A (current): verify the ``reset_from_ref`` height-alignment fix on
+    generator terrain. The terrain curriculum is enabled but ``max_init_terrain_level``
+    is pinned to 0, and no ``terrain_levels`` curriculum term is added yet, so every env
+    spawns on the flattest sub-terrain tile — a conservative first test of the命门 fix.
+    ``height_scan`` observation and the ``terrain_levels_vel`` curriculum are deferred to
+    milestone B (see TODOs below).
+    """
+
+    rewards: G1AmpRewards = G1AmpRewards()
+
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.scene.robot = UNITREE_G1_29DOF_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+
+        # ------------------------------------------------------
+        # Terrain (rough) — override the plane terrain from AmpSceneCfg
+        # ------------------------------------------------------
+        self.scene.terrain.terrain_type = "generator"
+        self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG
+        # curriculum=True routes env origins through the per-level layout; pinning
+        # max_init_terrain_level=0 (and adding no terrain_levels curriculum term yet)
+        # keeps every env on the flattest tile for milestone A. Milestone B will add
+        # the terrain_levels_vel curriculum term and raise this cap.
+        self.scene.terrain.terrain_generator.curriculum = True
+        self.scene.terrain.max_init_terrain_level = 0
+        # TODO(milestone B): add height_scanner (RayCasterCfg on torso_link) + height_scan
+        #   observation into policy/critic groups only (never disc/disc_demo).
+        # TODO(milestone B): add curriculum.terrain_levels = CurrTerm(mdp.terrain_levels_vel)
+        #   and raise max_init_terrain_level once the命门 fix is verified.
+
+        # ------------------------------------------------------
+        # motion data
+        # ------------------------------------------------------
+        self.motion_data.motion_dataset.motion_data_dir = os.path.join(
+            LEGGED_LAB_ROOT_DIR, "data", "MotionData", "g1_29dof", "amp", "walk_and_run"
+        )
+        self.motion_data.motion_dataset.motion_data_weights = {
+            "B10_-__Walk_turn_left_45_stageii": 1.0,
+            "B11_-__Walk_turn_left_135_stageii": 1.0,
+            "B13_-__Walk_turn_right_90_stageii": 1.0,
+            "B14_-__Walk_turn_right_45_t2_stageii": 1.0,
+            "B15_-__Walk_turn_around_stageii": 1.0,
+            "B22_-__side_step_left_stageii": 1.0,
+            "B23_-__side_step_right_stageii": 1.0,
+            "B4_-_Stand_to_Walk_backwards_stageii": 1.0,
+            "B9_-__Walk_turn_left_90_stageii": 1.0,
+            "C11_-_run_turn_left_90_stageii": 1.0,
+            "C12_-_run_turn_left_45_stageii": 1.0,
+            "C13_-_run_turn_left_135_stageii": 1.0,
+            "C14_-_run_turn_right_90_stageii": 1.0,
+            "C15_-_run_turn_right_45_stageii": 1.0,
+            "C16_-_run_turn_right_135_stageii": 1.0,
+            "C17_-_run_change_direction_stageii": 1.0,
+            "C1_-_stand_to_run_stageii": 1.0,
+            "C3_-_run_stageii": 1.0,
+            "C4_-_run_to_walk_a_stageii": 1.0,
+            "C5_-_walk_to_run_stageii": 1.0,
+            "C6_-_stand_to_run_backwards_stageii": 1.0,
+            "C8_-_run_backwards_to_stand_stageii": 1.0,
+            "C9_-_run_backwards_turn_run_forward_stageii": 1.0,
+            "Walk_B10_-_Walk_turn_left_45_stageii": 1.0,
+            "Walk_B13_-_Walk_turn_right_45_stageii": 1.0,
+            "Walk_B15_-_Walk_turn_around_stageii": 1.0,
+            "Walk_B16_-_Walk_turn_change_stageii": 1.0,
+            "Walk_B22_-_Side_step_left_stageii": 1.0,
+            "Walk_B23_-_Side_step_right_stageii": 1.0,
+            "Walk_B4_-_Stand_to_Walk_Back_stageii": 1.0,
+        }
+
+        # ------------------------------------------------------
+        # animation
+        # ------------------------------------------------------
+        self.animation.animation.num_steps_to_use = AMP_NUM_STEPS
+
+        # -----------------------------------------------------
+        # Observations
+        # -----------------------------------------------------
+        self.terminal_obs_groups = ("disc",)
+
+        # critic observations
+        self.observations.critic.key_body_pos_b.params = {
+            "asset_cfg": SceneEntityCfg(name="robot", body_names=KEY_BODY_NAMES, preserve_order=True)
+        }
+
+        # discriminator observations
+        self.observations.disc.history_length = AMP_NUM_STEPS
+
+        # discriminator demonstration observations
+        self.observations.disc_demo.ref_root_ang_vel_b.params["animation"] = ANIMATION_TERM_NAME
+        self.observations.disc_demo.ref_joint_pos.params["animation"] = ANIMATION_TERM_NAME
+        self.observations.disc_demo.ref_joint_vel.params["animation"] = ANIMATION_TERM_NAME
+
+        # ------------------------------------------------------
+        # Events
+        # ------------------------------------------------------
+        self.events.add_base_mass.params["asset_cfg"].body_names = "torso_link"
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["torso_link"]
+        # align_xy_to_origin=True: drop the reference motion's absolute xy so the robot
+        # spawns at the sub-terrain origin, whose env_origins.z is the known ground height
+        # on generator terrain — keeps root height aligned with no raycast. AMP does not
+        # track root position, so the reference xy carries no useful signal. See the
+        # reset_from_ref docstring for the full rationale.
+        self.events.reset_from_ref.params = {
+            "animation": ANIMATION_TERM_NAME,
+            "height_offset": 0.1,
+            "align_xy_to_origin": True,
+        }
+
+        # ------------------------------------------------------
+        # Commands
+        # ------------------------------------------------------
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.5, 3.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
+
+        # ------------------------------------------------------
+        # terminations
+        # ------------------------------------------------------
+        self.terminations.base_contact = None
+        # base_height uses absolute world-z (flat-terrain only); on generator terrain it
+        # would misfire as the ground rises. Disable it here — bad_orientation (60°) still
+        # catches falls. Milestone B may replace it with a terrain-relative variant.
+        self.terminations.base_height = None
+
+
+@configclass
+class G1AmpRoughEnvCfg_PLAY(G1AmpRoughEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.scene.num_envs = 48
+        self.scene.env_spacing = 2.5
+        # spawn on the flattest tiles and shrink the terrain grid to save memory
+        self.scene.terrain.max_init_terrain_level = 0
+        if self.scene.terrain.terrain_generator is not None:
+            self.scene.terrain.terrain_generator.num_rows = 5
+            self.scene.terrain.terrain_generator.num_cols = 5
+            self.scene.terrain.terrain_generator.curriculum = False
+
+        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 3.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.heading = (0.0, 0.0)
+
+        # disable randomization for play
+        self.observations.policy.enable_corruption = False
+        # remove random pushing
+        self.events.push_robot = None
+
+        self.events.reset_from_ref = None
