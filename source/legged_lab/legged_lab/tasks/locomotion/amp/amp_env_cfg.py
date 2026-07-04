@@ -401,12 +401,17 @@ class TerminationsCfg:
         func=mdp.illegal_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=MISSING), "threshold": 1.0},
     )
-    bad_orientation = DoneTerm(
-        func=mdp.bad_orientation,
-        params={
-            "limit_angle": math.radians(60.0),
-        },
-    )
+    # bad_orientation disabled (method X): the 60° tilt limit created a loophole — the
+    # policy learned a "push-up" pose (torso held off the ground by the hands, tilt kept
+    # just under 60°) that dodged both this term and the torso contact term while still
+    # collecting AMP style reward. The official velocity example has no orientation
+    # termination at all; rely on base_contact (torso_link) instead.
+    # bad_orientation = DoneTerm(
+    #     func=mdp.bad_orientation,
+    #     params={
+    #         "limit_angle": math.radians(60.0),
+    #     },
+    # )
 
 
 @configclass
