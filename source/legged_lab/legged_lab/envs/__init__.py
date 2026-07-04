@@ -5,7 +5,7 @@ lazily via __getattr__ (PEP 562). This avoids importing ManagerBasedRLEnv (which
 loads pxr) before SimulationApp is started, while still allowing:
   - `from legged_lab.envs.manager_based_amp_env_cfg import ManagerBasedAmpEnvCfg`
     (triggers this __init__ via parent-package import, but only cfg classes here)
-  - `gym.make("LeggedLab-Isaac-AMP-G1-v0")` resolves entry_point
+  - `gym.make("LeggedLab-Isaac-AMP-Flat-G1-v0")` resolves entry_point
     "legged_lab.envs:ManagerBasedAmpEnv" via __getattr__ at gym.make() time
     (after AppLauncher starts, pxr is safely available).
 """

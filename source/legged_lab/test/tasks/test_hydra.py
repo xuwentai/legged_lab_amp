@@ -93,7 +93,7 @@ def test_hydra():
 def test_nested_iterable_dict():
     """Test the hydra configuration system when dict is nested in an Iterable."""
 
-    @hydra_task_config_test("LeggedLab-Isaac-AMP-G1-v0", "rsl_rl_cfg_entry_point")
+    @hydra_task_config_test("LeggedLab-Isaac-AMP-Flat-G1-v0", "rsl_rl_cfg_entry_point")
     def main(env_cfg, agent_cfg):
         # env
         assert env_cfg.observations.critic.key_body_pos_b.params["asset_cfg"].preserve_order is True

@@ -33,7 +33,7 @@
 # Extra environment overrides (optional):
 #   SEED=42                 fixed seed shared by all runs
 #   MAX_ITER=20000          training iterations per run
-#   TASK=LeggedLab-Isaac-AMP-G1-v0
+#   TASK=LeggedLab-Isaac-AMP-Flat-G1-v0
 #   DRY_RUN=1               print commands instead of launching tmux
 # ---------------------------------------------------------------------------
 set -euo pipefail
@@ -53,7 +53,7 @@ fi
 # --- tunables --------------------------------------------------------------
 SEED="${SEED:-42}"
 MAX_ITER="${MAX_ITER:-20000}"
-TASK="${TASK:-LeggedLab-Isaac-AMP-G1-v0}"
+TASK="${TASK:-LeggedLab-Isaac-AMP-Flat-G1-v0}"
 DRY_RUN="${DRY_RUN:-0}"
 VENV_ACTIVATE="${VENV_ACTIVATE:-}"
 PROXY_URL="${PROXY_URL:-}"

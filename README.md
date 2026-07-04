@@ -245,14 +245,14 @@ python scripts/rsl_rl/play.py --task LeggedLab-Isaac-Deepmimic-G1-v0 --headless 
 To train the AMP algorithm, you can run the following command:
 
 ```bash
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000
 ```
 
 To train on a non-default GPU, set both `--device` and `agent.device`:
 
 ```bash
 # replace `x` with the gpu id you want to use
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --max_iterations 50000 \
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000 \
     --device cuda:x agent.device=cuda:x
 ```
 
@@ -267,7 +267,7 @@ You can play the trained model in a headless mode and record the video:
 
 ```bash
 # replace the checkpoint path with the path to your trained model
-python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-G1-v0 --headless --num_envs 64 --video --checkpoint logs/rsl_rl/experiment_name/run_name/model_xxx.pt
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --num_envs 64 --video --checkpoint logs/rsl_rl/experiment_name/run_name/model_xxx.pt
 ```
 
 The video will be saved in the `logs/rsl_rl/experiment_name/run_name/videos/play` directory.

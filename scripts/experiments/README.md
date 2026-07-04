@@ -49,7 +49,7 @@ Supported params and their Hydra override paths:
 | task_style_lerp      | agent.algorithm.amp_cfg.amp_discriminator.task_style_lerp   |
 
 Other env overrides: `SEED` (default 42), `MAX_ITER` (default 20000),
-`TASK` (default `LeggedLab-Isaac-AMP-G1-v0`), `DRY_RUN=1`.
+`TASK` (default `LeggedLab-Isaac-AMP-Flat-G1-v0`), `DRY_RUN=1`.
 
 ### Watching runs
 
