@@ -12,6 +12,7 @@ from isaaclab.envs.mdp import (
     base_lin_vel,
     base_pos_z,
     generated_commands,
+    height_scan,
     joint_pos,
     joint_pos_rel,
     joint_vel,

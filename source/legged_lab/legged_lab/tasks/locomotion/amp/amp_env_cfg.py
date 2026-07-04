@@ -7,13 +7,14 @@ from isaaclab_physx.physics import PhysxCfg
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
 from isaaclab.managers import EventTermCfg as EventTerm
+from isaaclab.managers import CurriculumTermCfg as CurrTerm
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
 from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
-from isaaclab.sensors import ContactSensorCfg
+from isaaclab.sensors import ContactSensorCfg, RayCasterCfg
 from isaaclab.sim import SimulationCfg
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils.configclass import configclass
@@ -96,6 +97,10 @@ class AmpSceneCfg(InteractiveSceneCfg):
     robot_anim: ArticulationCfg = None
     # sensors
     contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
+    # height scanner — None on the base (plane) scene; the rough config populates it with a
+    # RayCasterCfg on generator terrain, and the flat config keeps it None. See
+    # g1_amp_rough_env_cfg / g1_amp_flat_env_cfg.
+    height_scanner: RayCasterCfg = None
     # lights
     sky_light = AssetBaseCfg(
         prim_path="/World/skyLight",
@@ -154,21 +159,46 @@ class ObservationsCfg:
         # joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5))
         # actions = ObsTerm(func=mdp.last_action)
 
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
-        root_local_rot_tan_norm = ObsTerm(func=mdp.root_local_rot_tan_norm, noise=Unoise(n_min=-0.05, n_max=0.05))
-        velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        joint_pos = ObsTerm(func=mdp.joint_pos, noise=Unoise(n_min=-0.01, n_max=0.01))
-        joint_vel = ObsTerm(func=mdp.joint_vel, noise=Unoise(n_min=-1.5, n_max=1.5))
-        actions = ObsTerm(func=mdp.last_action)
+        base_ang_vel = ObsTerm(
+            func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2), history_length=5, flatten_history_dim=True
+        )
+        root_local_rot_tan_norm = ObsTerm(
+            func=mdp.root_local_rot_tan_norm,
+            noise=Unoise(n_min=-0.05, n_max=0.05),
+            history_length=5,
+            flatten_history_dim=True,
+        )
+        velocity_commands = ObsTerm(
+            func=mdp.generated_commands,
+            params={"command_name": "base_velocity"},
+            history_length=5,
+            flatten_history_dim=True,
+        )
+        joint_pos = ObsTerm(
+            func=mdp.joint_pos, noise=Unoise(n_min=-0.01, n_max=0.01), history_length=5, flatten_history_dim=True
+        )
+        joint_vel = ObsTerm(
+            func=mdp.joint_vel, noise=Unoise(n_min=-1.5, n_max=1.5), history_length=5, flatten_history_dim=True
+        )
+        actions = ObsTerm(func=mdp.last_action, history_length=5, flatten_history_dim=True)
+        # height_scan is added by the rough config (g1_amp_rough_env_cfg); it uses a
+        # shorter per-term history (3) than the proprioceptive terms (5). This only works
+        # because the group-level history_length is None below — a non-None group history
+        # would override every term's history_length. See __post_init__.
         # key_body_pos_b = ObsTerm(
         #     func=mdp.key_body_pos_b,
         #     params=MISSING,
         #     noise=Unoise(n_min=-0.08, n_max=0.08),
+        #     history_length=5,
+        #     flatten_history_dim=True,
         # )
-        # root_height = ObsTerm(func=mdp.base_pos_z)
+        # root_height = ObsTerm(func=mdp.base_pos_z, history_length=5, flatten_history_dim=True)
 
         def __post_init__(self):
-            self.history_length = 5
+            # history_length is set per-term (all proprio terms use 5) rather than at the
+            # group level, so the rough config can give height_scan its own history (3).
+            # A non-None group history_length would override every term's setting.
+            self.history_length = None
             self.enable_corruption = True
             self.concatenate_terms = True
 
@@ -180,20 +210,32 @@ class ObservationsCfg:
         """Observations for critic group. (has privilege observations)"""
 
         # observation terms (order preserved)
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel)
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
-        root_local_rot_tan_norm = ObsTerm(func=mdp.root_local_rot_tan_norm)
-        velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        joint_pos = ObsTerm(func=mdp.joint_pos)
-        joint_vel = ObsTerm(func=mdp.joint_vel)
-        actions = ObsTerm(func=mdp.last_action)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, history_length=5, flatten_history_dim=True)
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, history_length=5, flatten_history_dim=True)
+        root_local_rot_tan_norm = ObsTerm(
+            func=mdp.root_local_rot_tan_norm, history_length=5, flatten_history_dim=True
+        )
+        velocity_commands = ObsTerm(
+            func=mdp.generated_commands,
+            params={"command_name": "base_velocity"},
+            history_length=5,
+            flatten_history_dim=True,
+        )
+        joint_pos = ObsTerm(func=mdp.joint_pos, history_length=5, flatten_history_dim=True)
+        joint_vel = ObsTerm(func=mdp.joint_vel, history_length=5, flatten_history_dim=True)
+        actions = ObsTerm(func=mdp.last_action, history_length=5, flatten_history_dim=True)
         key_body_pos_b = ObsTerm(
             func=mdp.key_body_pos_b,
             params=MISSING,
+            history_length=5,
+            flatten_history_dim=True,
         )
+        # height_scan is added by the rough config with per-term history 3 (see PolicyCfg).
 
         def __post_init__(self):
-            self.history_length = 5
+            # history set per-term (see PolicyCfg) so the rough config can give height_scan
+            # a shorter history than the proprioceptive terms.
+            self.history_length = None
             self.enable_corruption = False
             self.concatenate_terms = True
 
@@ -371,7 +413,9 @@ class TerminationsCfg:
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    pass
+    # None on the base (plane) config; the rough config sets this to
+    # CurrTerm(func=mdp.terrain_levels_vel) to enable terrain-difficulty progression.
+    terrain_levels: CurrTerm = None
 
 
 @configclass
@@ -446,3 +490,14 @@ class LocomotionAmpEnvCfg(ManagerBasedAmpEnvCfg):
         # we tick all the sensors based on the smallest update period (physics update period)
         if self.scene.contact_forces is not None:
             self.scene.contact_forces.update_period = self.sim.dt
+        if getattr(self.scene, "height_scanner", None) is not None:
+            self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+
+        # check if terrain levels curriculum is enabled - if so, enable curriculum for the
+        # terrain generator (increasing difficulty). Mirrors the official velocity example.
+        if getattr(self.curriculum, "terrain_levels", None) is not None:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = True
+        else:
+            if self.scene.terrain.terrain_generator is not None:
+                self.scene.terrain.terrain_generator.curriculum = False

@@ -1,9 +1,13 @@
 import math
 import os
 
+from isaaclab.managers import CurriculumTermCfg as CurrTerm
+from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
+from isaaclab.sensors import RayCasterCfg, patterns
 from isaaclab.utils.configclass import configclass
+from isaaclab.utils.noise import UniformNoiseCfg as Unoise
 
 import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab import LEGGED_LAB_ROOT_DIR
@@ -122,12 +126,11 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
     from it and strips the rough-only pieces (mirrors the official IsaacLab velocity
     example, where ``flat_env_cfg`` derives from ``rough_env_cfg``).
 
-    Milestone A (current): verify the ``reset_from_ref`` height-alignment fix on
-    generator terrain. The terrain curriculum is enabled but ``max_init_terrain_level``
-    is pinned to 0, and no ``terrain_levels`` curriculum term is added yet, so every env
-    spawns on the flattest sub-terrain tile — a conservative first test of the命门 fix.
-    ``height_scan`` observation and the ``terrain_levels_vel`` curriculum are deferred to
-    milestone B (see TODOs below).
+    Uses ``ROUGH_TERRAINS_CFG`` generator terrain with a ``terrain_levels_vel`` difficulty
+    curriculum, a torso-mounted height scanner feeding ``height_scan`` into the policy and
+    critic groups (never the discriminator — the reference motions have no terrain channel),
+    and the ``reset_from_ref`` height-alignment fix (``align_xy_to_origin=True``) so the
+    robot spawns aligned to the sub-terrain ground height without any raycast.
     """
 
     rewards: G1AmpRewards = G1AmpRewards()
@@ -142,16 +145,51 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         self.scene.terrain.terrain_type = "generator"
         self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG
-        # curriculum=True routes env origins through the per-level layout; pinning
-        # max_init_terrain_level=0 (and adding no terrain_levels curriculum term yet)
-        # keeps every env on the flattest tile for milestone A. Milestone B will add
-        # the terrain_levels_vel curriculum term and raise this cap.
+        # terrain_levels curriculum (added below) enables generator.curriculum in the base
+        # __post_init__; max_init_terrain_level=5 lets envs start spread across difficulties
+        # and progress via the curriculum.
+        self.scene.terrain.max_init_terrain_level = 5
+
+        # ------------------------------------------------------
+        # Height scanner + height_scan observation (rough only)
+        # ------------------------------------------------------
+        # RayCaster grid under the torso (G1's base body). Copied from the official velocity
+        # example (GridPatternCfg 0.1m / 1.6x1.0m), with prim_path on torso_link.
+        self.scene.height_scanner = RayCasterCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/torso_link",
+            offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
+            ray_alignment="yaw",
+            pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+            debug_vis=False,
+            mesh_prim_paths=["/World/ground"],
+        )
+        # height_scan goes into policy + critic ONLY — never disc/disc_demo (the reference
+        # motions have no terrain channel). Per-term history_length=3 (proprio terms use 5);
+        # this relies on the policy/critic groups using per-term history (group history=None).
+        self.observations.policy.height_scan = ObsTerm(
+            func=mdp.height_scan,
+            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+            noise=Unoise(n_min=-0.1, n_max=0.1),
+            clip=(-1.0, 1.0),
+            history_length=3,
+            flatten_history_dim=True,
+        )
+        self.observations.critic.height_scan = ObsTerm(
+            func=mdp.height_scan,
+            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+            clip=(-1.0, 1.0),
+            history_length=3,
+            flatten_history_dim=True,
+        )
+
+        # ------------------------------------------------------
+        # Curriculum — terrain difficulty progression
+        # ------------------------------------------------------
+        self.curriculum.terrain_levels = CurrTerm(func=mdp.terrain_levels_vel)
+        # The base __post_init__ toggles terrain_generator.curriculum from terrain_levels,
+        # but it ran before we set terrain_levels above (super().__post_init__ runs first),
+        # so enable it explicitly here now that the curriculum term exists.
         self.scene.terrain.terrain_generator.curriculum = True
-        self.scene.terrain.max_init_terrain_level = 0
-        # TODO(milestone B): add height_scanner (RayCasterCfg on torso_link) + height_scan
-        #   observation into policy/critic groups only (never disc/disc_demo).
-        # TODO(milestone B): add curriculum.terrain_levels = CurrTerm(mdp.terrain_levels_vel)
-        #   and raise max_init_terrain_level once the命门 fix is verified.
 
         # ------------------------------------------------------
         # motion data

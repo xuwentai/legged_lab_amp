@@ -15,9 +15,8 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
 
     Inherits the full rough config and strips the rough-only pieces (mirrors the official
     IsaacLab velocity ``flat_env_cfg`` deriving from ``rough_env_cfg``): reverts the terrain
-    back to an infinite plane and disables the terrain curriculum. This reproduces the
-    original flat AMP behavior. Once milestone B adds height_scan / terrain_levels to the
-    rough base, this class must also null them out (see TODOs).
+    back to an infinite plane, removes the height scanner + height_scan observation, and
+    disables the terrain curriculum. This reproduces the original flat AMP behavior.
     """
 
     def __post_init__(self):
@@ -35,12 +34,12 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
             "height_offset": 0.1,
             "align_xy_to_origin": False,
         }
-        # TODO(milestone B): when the rough base adds height_scanner + height_scan obs and
-        #   the terrain_levels curriculum, null them here:
-        #     self.scene.height_scanner = None
-        #     self.observations.policy.height_scan = None
-        #     self.observations.critic.height_scan = None
-        #     self.curriculum.terrain_levels = None
+        # No terrain to perceive on flat ground: remove the height scanner, its policy/critic
+        # observations, and the terrain-difficulty curriculum (mirrors the official flat cfg).
+        self.scene.height_scanner = None
+        self.observations.policy.height_scan = None
+        self.observations.critic.height_scan = None
+        self.curriculum.terrain_levels = None
 
 
 @configclass
@@ -48,5 +47,11 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
     def __post_init__(self):
         super().__post_init__()
 
+        # revert terrain to plane and strip the rough-only perception (same as
+        # G1AmpFlatEnvCfg, but this PLAY variant derives from the rough PLAY config)
         self.scene.terrain.terrain_type = "plane"
         self.scene.terrain.terrain_generator = None
+        self.scene.height_scanner = None
+        self.observations.policy.height_scan = None
+        self.observations.critic.height_scan = None
+        self.curriculum.terrain_levels = None
