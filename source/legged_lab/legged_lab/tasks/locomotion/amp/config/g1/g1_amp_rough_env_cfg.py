@@ -41,7 +41,7 @@ class G1AmpRewards:
         func=mdp.track_lin_vel_xy_yaw_frame_exp, weight=1.0, params={"command_name": "base_velocity", "std": 0.5}
     )
     track_ang_vel_z_exp = RewTerm(
-        func=mdp.track_ang_vel_z_world_exp, weight=2.0, params={"command_name": "base_velocity", "std": 0.5}
+        func=mdp.track_ang_vel_z_world_exp, weight=0.5, params={"command_name": "base_velocity", "std": 0.5}
     )
 
     # -- penalties
@@ -164,21 +164,22 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             mesh_prim_paths=["/World/ground"],
         )
         # height_scan goes into policy + critic ONLY — never disc/disc_demo (the reference
-        # motions have no terrain channel). Per-term history_length=3 (proprio terms use 5);
-        # this relies on the policy/critic groups using per-term history (group history=None).
+        # motions have no terrain channel). history_length=1 (single frame): a single 187-dim
+        # grid keeps the symmetry left-right flip simple (matches the official anymal impl,
+        # which mirrors a single-frame height_scan). Proprio terms still use history 5.
         self.observations.policy.height_scan = ObsTerm(
             func=mdp.height_scan,
             params={"sensor_cfg": SceneEntityCfg("height_scanner")},
             noise=Unoise(n_min=-0.1, n_max=0.1),
             clip=(-1.0, 1.0),
-            history_length=3,
+            history_length=1,
             flatten_history_dim=True,
         )
         self.observations.critic.height_scan = ObsTerm(
             func=mdp.height_scan,
             params={"sensor_cfg": SceneEntityCfg("height_scanner")},
             clip=(-1.0, 1.0),
-            history_length=3,
+            history_length=1,
             flatten_history_dim=True,
         )
 
@@ -249,6 +250,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         self.observations.disc.history_length = AMP_NUM_STEPS
 
         # discriminator demonstration observations
+        self.observations.disc_demo.ref_root_local_rot_tan_norm.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_root_ang_vel_b.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_pos.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_vel.params["animation"] = ANIMATION_TERM_NAME
@@ -272,9 +274,15 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # Commands
         # ------------------------------------------------------
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.5, 3.0)
+        # Widened to match the walk_and_run AMP reference distribution (measured with
+        # temp/plot_base_vel_dist.py, 1s sliding-window mean in the body frame):
+        #   v_x  p1/p99 ≈ -2.09 / 2.80  → (-2.0, 3.0) covers the backward-run clips (C6/C8)
+        #   v_y  p1/p99 ≈ -0.48 / 0.53  → (-0.5, 0.5) already matches the side-step clips
+        #   w_z  p1/p99 ≈ -1.55 / 1.65  → (-1.5, 1.5) covers the fast turn-around/135° clips
+        # Sampling commands the policy can actually imitate keeps err_vel_xy from pinning.
+        self.commands.base_velocity.ranges.lin_vel_x = (-2.0, 3.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.5, 1.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
 
         # ------------------------------------------------------

@@ -243,7 +243,7 @@ class ObservationsCfg:
 
     @configclass
     class DiscriminatorCfg(ObsGroup):
-        # root_local_rot_tan_norm = ObsTerm(func=mdp.root_local_rot_tan_norm)
+        root_local_rot_tan_norm = ObsTerm(func=mdp.root_local_rot_tan_norm)
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
         joint_pos = ObsTerm(func=mdp.joint_pos)
         joint_vel = ObsTerm(func=mdp.joint_vel)
@@ -263,13 +263,13 @@ class ObservationsCfg:
 
     @configclass
     class DiscriminatorDemoCfg(ObsGroup):
-        # ref_root_local_rot_tan_norm = ObsTerm(
-        #     func=mdp.ref_root_local_rot_tan_norm,
-        #     params={
-        #         "animation": MISSING,
-        #         "flatten_steps_dim": False,
-        #     },
-        # )
+        ref_root_local_rot_tan_norm = ObsTerm(
+            func=mdp.ref_root_local_rot_tan_norm,
+            params={
+                "animation": MISSING,
+                "flatten_steps_dim": False,
+            },
+        )
         ref_root_ang_vel_b = ObsTerm(
             func=mdp.ref_root_ang_vel_b,
             params={
