@@ -23,8 +23,6 @@ simulation_app = app_launcher.app
 
 """Rest everything follows."""
 
-import isaacsim.core.utils.prims as prim_utils  # type: ignore
-
 import isaaclab.sim as sim_utils
 from isaaclab.assets import Articulation
 
@@ -60,9 +58,7 @@ if __name__ == "__main__":
     sim.set_camera_view(eye=[2.5, 2.5, 2.5], target=[0.0, 0.0, 0.0])
 
     # Create the scene
-    origin = [0.0, 0.0, 0.0]
-    prim_utils.create_prim("/World/Origin1", "Xform", translation=origin)
-    robot = Articulation(ROBOT_CFG.replace(prim_path="/World/Origin1/Robot"))
+    robot = Articulation(ROBOT_CFG.replace(prim_path="/World/Robot"))
 
     sim.reset()
 
