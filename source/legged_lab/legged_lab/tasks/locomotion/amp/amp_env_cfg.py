@@ -401,11 +401,20 @@ class TerminationsCfg:
         func=mdp.illegal_contact,
         params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=MISSING), "threshold": 1.0},
     )
+    # Base-height fall check. sensor_cfg=None here uses absolute world-z (flat-terrain default,
+    # identical to the stock root_height_below_minimum). The rough config swaps in the
+    # height_scanner RayCaster to make it terrain-relative. This is the primary loophole-closer
+    # for the "push-up" pose (base held low but no illegal contact) — it measures how far the
+    # base has actually sunk, independent of which links touch the ground.
+    base_height = DoneTerm(
+        func=mdp.root_height_below_minimum_adaptive,
+        params={"minimum_height": 0.2, "sensor_cfg": None},
+    )
     # bad_orientation disabled (method X): the 60° tilt limit created a loophole — the
     # policy learned a "push-up" pose (torso held off the ground by the hands, tilt kept
     # just under 60°) that dodged both this term and the torso contact term while still
     # collecting AMP style reward. The official velocity example has no orientation
-    # termination at all; rely on base_contact (torso_link) instead.
+    # termination at all; rely on base_contact (torso_link) + base_height instead.
     # bad_orientation = DoneTerm(
     #     func=mdp.bad_orientation,
     #     params={

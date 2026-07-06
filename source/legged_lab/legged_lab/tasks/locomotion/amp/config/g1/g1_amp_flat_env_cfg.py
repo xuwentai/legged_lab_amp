@@ -40,6 +40,9 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
         self.observations.policy.height_scan = None
         self.observations.critic.height_scan = None
         self.curriculum.terrain_levels = None
+        # base_height reverts to absolute world-z on flat ground (the rough base pointed it at
+        # the now-removed height_scanner). None => original root_height_below_minimum behavior.
+        self.terminations.base_height.params["sensor_cfg"] = None
 
 
 @configclass
@@ -55,3 +58,4 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
         self.observations.policy.height_scan = None
         self.observations.critic.height_scan = None
         self.curriculum.terrain_levels = None
+        self.terminations.base_height.params["sensor_cfg"] = None

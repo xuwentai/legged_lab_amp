@@ -280,11 +280,21 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # terminations
         # ------------------------------------------------------
-        # Fall-recovery fallback: terminate on torso contact (matches the official G1
-        # velocity rough config, which uses illegal_contact on torso_link). torso_link
-        # has a large torso/head collision mesh high on the body, so normal gait never
-        # touches it — only a real fall does. This replaces the removed base_height term.
-        self.terminations.base_contact.params["sensor_cfg"].body_names = "torso_link"
+        # Base-height fall check: make it terrain-relative on rough ground by feeding it the
+        # height_scanner RayCaster (the base config leaves sensor_cfg=None = absolute world-z,
+        # which misfires as the generator ground rises). This measures how far the base sank
+        # relative to the terrain underneath it.
+        self.terminations.base_height.params["sensor_cfg"] = SceneEntityCfg("height_scanner")
+        # Fall-recovery fallback: terminate on torso/pelvis contact (matches the official G1
+        # velocity rough config, which uses illegal_contact on torso_link). These links carry
+        # large collision meshes high on the body, so normal gait never touches them — only a
+        # real fall does. The "push-up pose" loophole (propping up on hands/forearms to keep the
+        # torso off the ground) is now caught by the terrain-relative base_height term above, so
+        # wrist/elbow contact bodies are no longer needed here — keep only torso and pelvis.
+        self.terminations.base_contact.params["sensor_cfg"].body_names = [
+            "torso_link",
+            "pelvis",
+        ]
 
 
 @configclass

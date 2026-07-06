@@ -56,6 +56,7 @@ from isaaclab_tasks.manager_based.locomotion.velocity.mdp import *  # noqa: F401
 # -- legged_lab deepmimic terms (ref motion, reset_from_ref, symmetry, etc.) ----
 from legged_lab.tasks.locomotion.deepmimic.mdp import *  # noqa: F401, F403
 
-# -- AMP-specific observation and reward functions ----------------------------
+# -- AMP-specific observation, reward, and termination functions --------------
 from .observations import *  # noqa: F401, F403
 from .rewards import *  # noqa: F401, F403
+from .terminations import *  # noqa: F401, F403
