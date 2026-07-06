@@ -6,14 +6,14 @@ from legged_lab.tasks.locomotion.amp.mdp.symmetry import g1
 
 
 @configclass
-class G1RslRlOnPolicyRunnerAmpCfg(RslRlOnPolicyRunnerCfg):
+class G1AmpRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     # Use stock OnPolicyRunner — PPOAMP is selected by algorithm.class_name below.
     class_name = "OnPolicyRunner"
 
     num_steps_per_env = 24
     max_iterations = 50000
     save_interval = 200
-    experiment_name = "g1_amp"
+    experiment_name = "g1_amp_rough"
 
     # Map algo-level obs-set names → env obs-group names.
     # "discriminator" and "discriminator_demonstration" are consumed by PPOAMP directly.
@@ -46,7 +46,7 @@ class G1RslRlOnPolicyRunnerAmpCfg(RslRlOnPolicyRunnerCfg):
         entropy_coef=0.01,
         num_learning_epochs=5,
         num_mini_batches=4,
-        learning_rate=1.0e-4,
+        learning_rate=1.0e-3,
         schedule="adaptive",
         gamma=0.99,
         lam=0.95,
@@ -74,3 +74,11 @@ class G1RslRlOnPolicyRunnerAmpCfg(RslRlOnPolicyRunnerCfg):
             mirror_loss_coeff=0.1,
         ),
     )
+
+
+@configclass
+class G1AmpFlatPPORunnerCfg(G1AmpRoughPPORunnerCfg):
+    def __post_init__(self):
+        super().__post_init__()
+
+        self.experiment_name = "g1_amp_flat"
