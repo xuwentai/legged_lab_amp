@@ -120,15 +120,16 @@ class AmpSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command specifications for the MDP."""
 
-    base_velocity = mdp.UniformVelocityCommandCfg(
+    base_velocity = mdp.AmpVelocityCommandCfg(
         asset_name="robot",
         resampling_time_range=(10.0, 10.0),
         rel_standing_envs=0.02,
         rel_heading_envs=1.0,
         heading_command=True,
         heading_control_stiffness=0.5,
+        reset_heading_lookahead=0.5,
         debug_vis=True,
-        ranges=mdp.UniformVelocityCommandCfg.Ranges(
+        ranges=mdp.AmpVelocityCommandCfg.Ranges(
             lin_vel_x=(-0.1, 0.1), lin_vel_y=(-0.1, 0.1), ang_vel_z=(-0.1, 0.1), heading=(-math.pi, math.pi)
         ),
     )

@@ -57,6 +57,10 @@ from isaaclab_tasks.manager_based.locomotion.velocity.mdp import *  # noqa: F401
 from legged_lab.tasks.locomotion.deepmimic.mdp import *  # noqa: F401, F403
 
 # -- AMP-specific observation, reward, and termination functions --------------
+# NOTE: only the *cfg* for the custom command is imported here — the command term
+# (commands/velocity_command.py) pulls isaaclab.markers/pxr and must not be imported before
+# SimulationApp starts. Its cfg references it lazily via a string class_type path.
+from .commands import *  # noqa: F401, F403
 from .observations import *  # noqa: F401, F403
 from .rewards import *  # noqa: F401, F403
 from .terminations import *  # noqa: F401, F403
