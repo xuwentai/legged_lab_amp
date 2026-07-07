@@ -50,3 +50,6 @@ scripts/experiments/env.local.sh
 # smoke test logs (local only)
 smoke_test_logs/
 logs/
+
+# temporary frame dumps from play/record
+_frames_tmp/
