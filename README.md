@@ -242,32 +242,47 @@ python scripts/rsl_rl/play.py --task LeggedLab-Isaac-Deepmimic-G1-v0 --headless 
 <details>
 <summary>Train</summary>
 
-To train the AMP algorithm, you can run the following command:
+The AMP task is split into two configs: **flat** terrain (`LeggedLab-Isaac-AMP-Flat-G1-v0`)
+and **rough** generator terrain (`LeggedLab-Isaac-AMP-Rough-G1-v0`, with a height scanner and
+a terrain-difficulty curriculum). Pick whichever task id you want to train:
 
 ```bash
+# flat terrain
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000
+
+# rough terrain
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000
 ```
 
 To train on a non-default GPU, set both `--device` and `agent.device`:
 
 ```bash
 # replace `x` with the gpu id you want to use
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000 \
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 \
     --device cuda:x agent.device=cuda:x
 ```
 
-For more details about the arguments, run `python scripts/rsl_rl/train.py -h`.
+Checkpoints are written to `logs/rsl_rl/g1_amp_flat/...` and `logs/rsl_rl/g1_amp_rough/...`
+respectively. For more details about the arguments, run `python scripts/rsl_rl/train.py -h`.
 
 </details>
 
 <details>
 <summary>Play</summary>
 
-You can play the trained model in a headless mode and record the video:
+You can play the trained model and record a video. Use `--viz kit` so the command-velocity
+arrows (desired vs. actual base velocity, drawn above the robot) are rendered into the video:
 
 ```bash
-# replace the checkpoint path with the path to your trained model
-python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --num_envs 64 --video --checkpoint logs/rsl_rl/experiment_name/run_name/model_xxx.pt
+# flat terrain — replace the checkpoint path with the path to your trained model
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 \
+    --num_envs 64 --video --viz kit \
+    --checkpoint logs/rsl_rl/g1_amp_flat/run_name/model_xxx.pt
+
+# rough terrain
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
+    --num_envs 64 --video --viz kit \
+    --checkpoint logs/rsl_rl/g1_amp_rough/run_name/model_xxx.pt
 ```
 
 The video will be saved in the `logs/rsl_rl/experiment_name/run_name/videos/play` directory.
