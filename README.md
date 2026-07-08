@@ -270,8 +270,10 @@ respectively. For more details about the arguments, run `python scripts/rsl_rl/t
 <details>
 <summary>Play</summary>
 
-You can play the trained model and record a video. Use `--viz kit` so the command-velocity
-arrows (desired vs. actual base velocity, drawn above the robot) are rendered into the video:
+There are two ways to play a trained model, selected by the `--viz` backend.
+
+**Mode 1 — record a video (`--viz kit`).** The Kit visualizer renders the command-velocity
+arrows (desired vs. actual base velocity, drawn above the robot) into the recorded video:
 
 ```bash
 # flat terrain — replace the checkpoint path with the path to your trained model
@@ -286,6 +288,25 @@ python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
 ```
 
 The video will be saved in the `logs/rsl_rl/experiment_name/run_name/videos/play` directory.
+
+**Mode 2 — interactive visualization (`--viz viser`).** The Viser backend serves a live 3D
+view over HTTP (no recording, no display needed) — open the printed URL in a browser. Do not
+pass `--video` or `--headless` in this mode (Viser is a kitless backend and needs neither):
+
+```bash
+# flat terrain — replace the checkpoint path with the path to your trained model
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 \
+    --num_envs 16 --viz viser \
+    --checkpoint logs/rsl_rl/g1_amp_flat/run_name/model_xxx.pt
+
+# rough terrain
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
+    --num_envs 16 --viz viser \
+    --checkpoint logs/rsl_rl/g1_amp_rough/run_name/model_xxx.pt
+```
+
+On a remote machine, forward the Viser port to your local browser, e.g.
+`ssh -L 8080:localhost:8080 <host>`.
 
 </details>
 

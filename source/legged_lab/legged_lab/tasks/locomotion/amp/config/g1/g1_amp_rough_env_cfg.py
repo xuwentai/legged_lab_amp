@@ -99,7 +99,7 @@ class G1AmpRewards:
 
     feet_air_time = RewTerm(
         func=mdp.feet_air_time_positive_biped,
-        weight=0.25,
+        weight=0.75,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
@@ -274,13 +274,18 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # Commands
         # ------------------------------------------------------
-        # Widened to match the walk_and_run AMP reference distribution (measured with
-        # temp/plot_base_vel_dist.py, 1s sliding-window mean in the body frame):
-        #   v_x  p1/p99 ≈ -2.09 / 2.80  → (-2.0, 3.0) covers the backward-run clips (C6/C8)
-        #   v_y  p1/p99 ≈ -0.48 / 0.53  → (-0.5, 0.5) already matches the side-step clips
-        #   w_z  p1/p99 ≈ -1.55 / 1.65  → (-1.5, 1.5) covers the fast turn-around/135° clips
-        # Sampling commands the policy can actually imitate keeps err_vel_xy from pinning.
-        self.commands.base_velocity.ranges.lin_vel_x = (-2.0, 3.0)
+        # Ranges chosen to match what the walk_and_run AMP data can actually *sustain*, not
+        # its instantaneous tails (body frame, measured offline on the reference clips):
+        #   v_x lower bound 0.0: the raw p1 is ~-2.0, but those fast-backward frames are
+        #     transient turn/pivot instants -- NO clip sustains straight (|w_z|<0.5) backward
+        #     v_x<-1.0 for even 0.5 s. The one sustained straight backward walk (B4 / Walk_B4
+        #     stand-to-walk-back) only reaches v_x ~ -0.3..-0.45, too little / too rare to
+        #     imitate reliably, so we drop backward commands entirely: 0.0 removes the
+        #     discriminator-less backward-hop failure mode outright. (was -2.0)
+        #   v_y (-0.5, 0.5): matches the side-step clips (p1/p99 ~ -0.48 / 0.53).
+        #   w_z (-1.5, 1.5): covers the fast turn-around / 135deg clips (p1/p99 ~ -1.55 / 1.65).
+        # The reset-aligned command in AmpVelocityCommand is clamped to these same ranges.
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 3.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.5, 1.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
@@ -302,6 +307,8 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "torso_link",
             "pelvis",
+            ".*_elbow_link",
+            ".*_wrist_.*"
         ]
 
 
@@ -319,10 +326,10 @@ class G1AmpRoughEnvCfg_PLAY(G1AmpRoughEnvCfg):
             self.scene.terrain.terrain_generator.num_cols = 5
             self.scene.terrain.terrain_generator.curriculum = False
 
-        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 3.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 3.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
-        self.commands.base_velocity.ranges.heading = (0.0, 0.0)
+        self.commands.base_velocity.ranges.heading =  (-math.pi, math.pi)
 
         # disable randomization for play
         self.observations.policy.enable_corruption = False

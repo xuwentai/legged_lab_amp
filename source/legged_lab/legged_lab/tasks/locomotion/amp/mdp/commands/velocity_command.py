@@ -83,8 +83,22 @@ class AmpVelocityCommand(UniformVelocityCommand):
         ref_lin_vel_b = math_utils.quat_apply_inverse(ref_quat, ref_lin_vel_w)  # (N, 3)
         ref_ang_vel_b = math_utils.quat_apply_inverse(ref_quat, ref_ang_vel_w)  # (N, 3)
 
-        self.vel_command_b[env_ids, 0] = ref_lin_vel_b[:, 0]
-        self.vel_command_b[env_ids, 1] = ref_lin_vel_b[:, 1]
+        # Clamp the aligned linear command to the configured command ranges (same rationale
+        # as the ang_vel_z clamp below). The reference frame is a single instant: on turn /
+        # side-step / pivot frames the body-frame v_x can spike well past what any *sustained,
+        # straight* backward/forward walk reaches in the data (e.g. v_x ~ -2 m/s from a fast
+        # turn-around). Because v_x/v_y are then latched for the whole resample window
+        # (resampling_time_range), that transient spike becomes a several-second straight
+        # command the discriminator has no matching demo for -- which the policy can only
+        # satisfy by hopping. Clamping keeps the aligned command inside the imitable range;
+        # with lin_vel_x lower-bounded at 0.0 (see G1AmpRoughEnvCfg), backward reference
+        # frames collapse to a zero forward command rather than a phantom backward walk.
+        self.vel_command_b[env_ids, 0] = ref_lin_vel_b[:, 0].clamp(
+            self.cfg.ranges.lin_vel_x[0], self.cfg.ranges.lin_vel_x[1]
+        )
+        self.vel_command_b[env_ids, 1] = ref_lin_vel_b[:, 1].clamp(
+            self.cfg.ranges.lin_vel_y[0], self.cfg.ranges.lin_vel_y[1]
+        )
         # yaw placeholder; overwritten each step by the heading controller when heading_command
         self.vel_command_b[env_ids, 2] = ref_ang_vel_b[:, 2]
 
