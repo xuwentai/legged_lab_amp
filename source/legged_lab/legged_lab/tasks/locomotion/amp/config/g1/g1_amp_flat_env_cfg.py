@@ -59,3 +59,8 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
         self.observations.critic.height_scan = None
         self.curriculum.terrain_levels = None
         self.terminations.base_height.params["sensor_cfg"] = None
+        # This PLAY variant derives from the rough PLAY chain (not G1AmpFlatEnvCfg), so it inherits
+        # reset_from_ref with align_xy_to_origin=True (the rough default). On plane terrain
+        # env_origins.z == 0 and the reference motion's absolute xy is valid ground, so match the
+        # non-play G1AmpFlatEnvCfg and keep the reference xy (DeepMimic-style reset).
+        self.events.reset_from_ref.params["align_xy_to_origin"] = False

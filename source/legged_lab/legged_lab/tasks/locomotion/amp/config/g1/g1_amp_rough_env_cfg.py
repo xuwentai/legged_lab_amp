@@ -115,6 +115,20 @@ class G1AmpRewards:
         },
     )
 
+    # Soft collision penalty for arm links (wrists/elbows). Previously these were in the
+    # base_contact termination, which forced the policy into weird arm postures to avoid ever
+    # touching them (any contact => is_terminated => -200). Relaxed here to a per-step penalty
+    # that discourages, but does not forbid, arm self/ground contact. Counts the number of arm
+    # bodies whose net contact force exceeds the threshold (force magnitude ignored).
+    undesired_arm_contacts = RewTerm(
+        func=mdp.undesired_contacts,
+        weight=-1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=[".*_elbow_link", ".*_wrist_.*"]),
+            "threshold": 1.0,
+        },
+    )
+
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
 
 
@@ -160,7 +174,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
             ray_alignment="yaw",
             pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
-            debug_vis=False,
+            debug_vis=True,
             mesh_prim_paths=["/World/ground"],
         )
         # height_scan goes into policy + critic ONLY — never disc/disc_demo (the reference
@@ -302,13 +316,13 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # velocity rough config, which uses illegal_contact on torso_link). These links carry
         # large collision meshes high on the body, so normal gait never touches them — only a
         # real fall does. The "push-up pose" loophole (propping up on hands/forearms to keep the
-        # torso off the ground) is now caught by the terrain-relative base_height term above, so
-        # wrist/elbow contact bodies are no longer needed here — keep only torso and pelvis.
+        # torso off the ground) is caught by the terrain-relative base_height term above, so
+        # wrist/elbow contact bodies are no longer terminated here — arm contact is instead
+        # discouraged softly via the ``undesired_arm_contacts`` reward penalty, which avoids the
+        # weird arm postures the policy learned to guarantee zero arm contact.
         self.terminations.base_contact.params["sensor_cfg"].body_names = [
             "torso_link",
             "pelvis",
-            ".*_elbow_link",
-            ".*_wrist_.*"
         ]
 
 
@@ -336,4 +350,9 @@ class G1AmpRoughEnvCfg_PLAY(G1AmpRoughEnvCfg):
         # remove random pushing
         self.events.push_robot = None
 
-        self.events.reset_from_ref = None
+        # Keep reset_from_ref active during play. It is the ONLY reset-mode event that actually
+        # repositions the robot (writes root pose + joint state from a reference frame); the other
+        # reset event (base_external_force_torque) applies zero force and is a no-op. IsaacLab's
+        # _reset_idx / scene.reset() does not reposition the articulation by itself. If this were
+        # None, a fired termination (e.g. base_height when a robot falls) would run an empty reset
+        # and leave the robot lying in place — terminations would look like they never trigger.
