@@ -47,6 +47,9 @@ _build
 # Batch experiment machine-local config
 scripts/experiments/env.local.sh
 
+# Interactive launcher: last-used selections
+scripts/launch/.launch_last.json
+
 # smoke test logs (local only)
 smoke_test_logs/
 logs/

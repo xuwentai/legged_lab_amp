@@ -201,6 +201,28 @@ Please refer to the comments in the script for more details about the arguments,
 <a id="training-and-play"></a>
 ### 2. Training & Play
 
+#### ⚡ Interactive launcher (optional)
+
+Instead of hand-writing the commands below, you can use the interactive
+launcher, which scans the repo for tasks, shows live GPU usage, and walks you
+through the common options (GPU, `--viz` backend, `max_iterations`, `run_name`,
+checkpoint selection, Hydra overrides, …). It then either prints the assembled
+command for you to copy, or launches it directly in a tmux session named after
+your `run_name`:
+
+```bash
+python -m scripts.launch
+```
+
+Navigate the menus with the arrow keys (↑/↓, or `j`/`k`) and press `Enter` to
+select. Long lists (e.g. many checkpoints) are paged 10 per page: use ←/→ (or
+`h`/`l`) to flip pages and `0`-`9` to jump straight to an entry on the current
+page; `q` cancels. The tmux mode reads your Python env and proxy from
+`scripts/experiments/env.local.sh`
+(see [experiments README](scripts/experiments/README.md)).
+
+The sections below document the underlying `train.py` / `play.py` commands.
+
 #### 🎭 DeepMimic
 
 <details>
