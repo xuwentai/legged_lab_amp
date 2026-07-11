@@ -58,7 +58,7 @@ class G1AmpRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
             disc_linear_weight_decay=1.0e-1,  # tuned (was 1e-2)
             disc_learning_rate=1.0e-5,        # tuned (was 1e-4)
             disc_max_grad_norm=1.0,
-            disc_update_interval=5,           # update disc once every 5 PPO mini-batches
+            disc_update_interval=10,          # rough: slow the disc (was 5). flat overrides back to 5.
             amp_discriminator=RslRlAmpCfg.AMPDiscriminatorCfg(
                 hidden_dims=[1024, 512],
                 activation="elu",
@@ -82,3 +82,8 @@ class G1AmpFlatPPORunnerCfg(G1AmpRoughPPORunnerCfg):
         super().__post_init__()
 
         self.experiment_name = "g1_amp_flat"
+
+        # flat keeps disc_update_interval=5: the discriminator does not over-saturate on flat
+        # (success_rate converges to ~1.0), so no need to slow it. The rough base sets 8; revert
+        # it here so flat behavior is unchanged.
+        self.algorithm.amp_cfg.disc_update_interval = 5
