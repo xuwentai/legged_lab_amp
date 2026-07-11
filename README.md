@@ -21,6 +21,7 @@
   - [Prepare Motion Data](#prepare-motion-data)
   - [Training & Play](#training-and-play)
 - [Roadmap](#roadmap)
+- [Citation](#citation)
 - [Acknowledgement](#acknowledgement)
 
 <a id="overview"></a>
@@ -43,6 +44,7 @@ https://github.com/user-attachments/assets/ed84a8a3-f349-44ac-9cfd-2baab2265a25
 <a id="news-updates"></a>
 ## 🔥 News & Updates
 
+- 2026/07/11: AMP now walks on **rough terrain**: swapped the foot-catching height-field tiles for smooth Perlin ports (ported from [InstinctLab](https://github.com/project-instinct/instinctlab/)), and added a third-person follow camera (`--follow_cam`) to the Kit play viewport.
 - 2026/07/01: Migrated to **Isaac Lab v3.0.0** and **rsl-rl-lib 5.4.1**. AMP is now an **external algorithm module** (`legged_lab/rsl_rl/amp`) selected via `class_name`, so no forked `rsl_rl` is needed.
 - 2026/02/09: Add Dockerfile + bash script workflow, including host path requirement for local `rsl_rl`.
 - 2025/12/16: Test in Isaac Lab 2.3.1 and RSL-RL 3.2.0.
@@ -311,6 +313,25 @@ python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
 
 The video will be saved in the `logs/rsl_rl/experiment_name/run_name/videos/play` directory.
 
+To keep the robot centered in the recording, add `--follow_cam` — the Kit viewport
+then chases the followed body (default `torso_link`, env 0) in a third-person view:
+
+```bash
+# smooth position-only follow (camera keeps a fixed viewing direction)
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
+    --viz kit --video --follow_cam \
+    --checkpoint logs/rsl_rl/g1_amp_rough/run_name/model_xxx.pt
+
+# follow AND rotate with the robot's heading, damping the per-step yaw jitter
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
+    --viz kit --video --follow_cam --follow_yaw --follow_smooth 0.9 \
+    --checkpoint logs/rsl_rl/g1_amp_rough/run_name/model_xxx.pt
+```
+
+Tune the shot with `--follow_env` / `--follow_body` / `--follow_offset`; run
+`python scripts/rsl_rl/play.py -h` for the full list. The follow camera drives the
+Kit viewport only — the Viser backend (Mode 2) manages its own camera and ignores it.
+
 **Mode 2 — interactive visualization (`--viz viser`).** The Viser backend serves a live 3D
 view over HTTP (no recording, no display needed) — open the printed URL in a browser. Do not
 pass `--video` or `--headless` in this mode (Viser is a kitless backend and needs neither):
@@ -341,7 +362,23 @@ On a remote machine, forward the Viser port to your local browser, e.g.
 - [x] Symmetric Reward
 - [ ] Sim2sim in mujoco
 - [ ] Add support for image observations
-- [ ] Walk in rough terrain with AMP
+- [x] Walk in rough terrain with AMP
+
+<a id="citation"></a>
+## 📚 Citation
+
+If you find this repository useful in your research, please consider citing it:
+
+```bibtex
+@misc{legged_lab,
+  author       = {Zitong Bai},
+  title        = {Legged Lab: An Isaac Lab Extension for Legged Robot Reinforcement Learning},
+  year         = {2026},
+  publisher    = {GitHub},
+  journal      = {GitHub repository},
+  howpublished = {\url{https://github.com/zitongbai/legged_lab}}
+}
+```
 
 <a id="acknowledgement"></a>
 ## 🙏 Acknowledgement
@@ -353,3 +390,4 @@ We would like to express our gratitude to the following open-source projects:
 - [**AMP_for_hardware**](https://github.com/Alescontrela/AMP_for_hardware) - Inspiration for AMP implementation.
 - [**GMR**](https://github.com/YanjieZe/GMR) - Excellent motion retargeting library.
 - [**MimicKit**](https://github.com/xbpeng/MimicKit) - Reference for imitation learning.
+- [**InstinctLab**](https://github.com/project-instinct/instinctlab/) - Reference for the Perlin-augmented terrain generation.
