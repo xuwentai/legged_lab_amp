@@ -339,13 +339,20 @@ class G1AmpRoughEnvCfg_PLAY(G1AmpRoughEnvCfg):
         # spawn on the flattest tiles and shrink the terrain grid to save memory
         self.scene.terrain.max_init_terrain_level = 0
         if self.scene.terrain.terrain_generator is not None:
-            self.scene.terrain.terrain_generator.num_rows = 5
-            self.scene.terrain.terrain_generator.num_cols = 5
+            self.scene.terrain.terrain_generator.num_rows = 10
+            self.scene.terrain.terrain_generator.num_cols = 10
             self.scene.terrain.terrain_generator.curriculum = False
+            # self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs"].proportion = 0.2
+            # self.scene.terrain.terrain_generator.sub_terrains["pyramid_stairs_inv"].proportion = 0.2
+            # self.scene.terrain.terrain_generator.sub_terrains["boxes"].proportion = 0.2
+            # self.scene.terrain.terrain_generator.sub_terrains["random_rough"].proportion = 0.0
+            # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope"].proportion = 0.0
+            # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = 0.0
+            
 
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 3.0)
-        self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (1.5, 3.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.heading =  (-math.pi, math.pi)
 
         # disable randomization for play
