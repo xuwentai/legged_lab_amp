@@ -244,7 +244,14 @@ class ObservationsCfg:
 
     @configclass
     class DiscriminatorCfg(ObsGroup):
-        root_local_rot_tan_norm = ObsTerm(func=mdp.root_local_rot_tan_norm)
+        # root_local_rot_tan_norm removed from the discriminator: it encodes the full base
+        # orientation (roll/pitch/yaw), which is exactly what diverges most between the flat
+        # reference mocap and rough-terrain motion. Keeping it let the discriminator separate
+        # agent-vs-demo almost instantly on rough (disc_loss collapses to ~2e-3 within ~2.7k
+        # iters), killing the LSGAN style reward before the policy learns to walk. Dropped so
+        # the discriminator scores gait (joint_pos/vel + base_ang_vel), not body tilt. Must stay
+        # paired with ref_root_local_rot_tan_norm in DiscriminatorDemoCfg (dims must match).
+        # root_local_rot_tan_norm = ObsTerm(func=mdp.root_local_rot_tan_norm)
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel)
         joint_pos = ObsTerm(func=mdp.joint_pos)
         joint_vel = ObsTerm(func=mdp.joint_vel)
@@ -264,13 +271,14 @@ class ObservationsCfg:
 
     @configclass
     class DiscriminatorDemoCfg(ObsGroup):
-        ref_root_local_rot_tan_norm = ObsTerm(
-            func=mdp.ref_root_local_rot_tan_norm,
-            params={
-                "animation": MISSING,
-                "flatten_steps_dim": False,
-            },
-        )
+        # Paired with the disc-side removal above (dims must match). Keep commented together.
+        # ref_root_local_rot_tan_norm = ObsTerm(
+        #     func=mdp.ref_root_local_rot_tan_norm,
+        #     params={
+        #         "animation": MISSING,
+        #         "flatten_steps_dim": False,
+        #     },
+        # )
         ref_root_ang_vel_b = ObsTerm(
             func=mdp.ref_root_ang_vel_b,
             params={

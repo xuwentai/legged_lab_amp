@@ -266,7 +266,8 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         self.observations.disc.history_length = AMP_NUM_STEPS
 
         # discriminator demonstration observations
-        self.observations.disc_demo.ref_root_local_rot_tan_norm.params["animation"] = ANIMATION_TERM_NAME
+        # ref_root_local_rot_tan_norm removed from disc_demo (paired with the disc-side
+        # root_local_rot_tan_norm removal in amp_env_cfg) — no animation param to wire up.
         self.observations.disc_demo.ref_root_ang_vel_b.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_pos.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_vel.params["animation"] = ANIMATION_TERM_NAME
