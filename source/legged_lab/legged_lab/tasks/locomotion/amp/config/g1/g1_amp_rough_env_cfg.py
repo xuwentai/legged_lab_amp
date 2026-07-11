@@ -17,7 +17,7 @@ from legged_lab import LEGGED_LAB_ROOT_DIR
 ##
 from legged_lab.assets.unitree import UNITREE_G1_29DOF_CFG
 from legged_lab.tasks.locomotion.amp.amp_env_cfg import LocomotionAmpEnvCfg
-from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
+from legged_lab.terrains.config.rough import ROUGH_PERLIN_TERRAINS_CFG  # isort: skip
 
 # The order must align with the retarget config file scripts/tools/retarget/config/g1_29dof.yaml
 KEY_BODY_NAMES = [
@@ -140,7 +140,9 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
     from it and strips the rough-only pieces (mirrors the official IsaacLab velocity
     example, where ``flat_env_cfg`` derives from ``rough_env_cfg``).
 
-    Uses ``ROUGH_TERRAINS_CFG`` generator terrain with a ``terrain_levels_vel`` difficulty
+    Uses ``ROUGH_PERLIN_TERRAINS_CFG`` generator terrain (the official ``ROUGH_TERRAINS_CFG``
+    with the foot-catching height-field tiles — ``random_rough`` and the two ``hf_pyramid_slope``
+    tiles — swapped for smooth Perlin ports) with a ``terrain_levels_vel`` difficulty
     curriculum, a torso-mounted height scanner feeding ``height_scan`` into the policy and
     critic groups (never the discriminator — the reference motions have no terrain channel),
     and the ``reset_from_ref`` height-alignment fix (``align_xy_to_origin=True``) so the
@@ -158,7 +160,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # Terrain (rough) — override the plane terrain from AmpSceneCfg
         # ------------------------------------------------------
         self.scene.terrain.terrain_type = "generator"
-        self.scene.terrain.terrain_generator = ROUGH_TERRAINS_CFG
+        self.scene.terrain.terrain_generator = ROUGH_PERLIN_TERRAINS_CFG
         # terrain_levels curriculum (added below) enables generator.curriculum in the base
         # __post_init__; max_init_terrain_level=5 lets envs start spread across difficulties
         # and progress via the curriculum.
