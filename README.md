@@ -337,6 +337,19 @@ view over HTTP (no recording, no display needed) — open the printed URL in a b
 pass `--video` or `--headless` in this mode (Viser is a kitless backend and needs neither):
 
 ```bash
+
+
+# 1. 创建 _isaac_sim 软链接（只需做一次）
+cd /home/airs/legged_lab_amp
+ln -s /home/airs/isaacsim6.0.0 _isaac_sim
+
+# 2. 每次运行前 source Isaac Sim 环境
+conda activate leggedamp
+source /home/airs/isaacsim6.0.0/setup_conda_env.sh
+export ISAAC_PATH=/home/airs/isaacsim6.0.0
+export EXP_PATH=/home/airs/isaacsim6.0.0/apps
+export CARB_APP_PATH=/home/airs/isaacsim6.0.0/kit
+
 # flat terrain — replace the checkpoint path with the path to your trained model
 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 \
     --num_envs 16 --viz viser \

@@ -26,6 +26,14 @@ __all__ = [
     "MotionMatchedTerrainCfg",
     "PerlinMeshFloatingBoxTerrainCfg",
     "PerlinMeshRandomMultiBoxTerrainCfg",
+    # -- importer + virtual obstacle support --
+    "TerrainImporter",
+    "TerrainImporterCfg",
+    "EdgeCylinder",
+    "EdgeCylinderCfg",
+    "GreedyconcatEdgeCylinderCfg",
+    "VirtualObstacleBase",
+    "VirtualObstacleCfg",
     # -- custom generator (heavy: pulls isaaclab TerrainGenerator -> pxr/USD) --
     "FiledTerrainGenerator",
     "FiledTerrainGeneratorCfg",
@@ -57,3 +65,12 @@ from .trimesh import (
 )
 from .terrain_generator import FiledTerrainGenerator
 from .terrain_generator_cfg import FiledTerrainGeneratorCfg
+from .terrain_importer import TerrainImporter
+from .terrain_importer_cfg import TerrainImporterCfg
+from .virtual_obstacle import (
+    EdgeCylinder,
+    EdgeCylinderCfg,
+    GreedyconcatEdgeCylinderCfg,
+    VirtualObstacleBase,
+    VirtualObstacleCfg,
+)

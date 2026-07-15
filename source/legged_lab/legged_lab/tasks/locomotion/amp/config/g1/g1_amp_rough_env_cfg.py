@@ -2,6 +2,7 @@ import math
 import os
 
 from isaaclab.managers import CurriculumTermCfg as CurrTerm
+from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
@@ -11,6 +12,7 @@ from isaaclab.utils.noise import UniformNoiseCfg as Unoise
 
 import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab import LEGGED_LAB_ROOT_DIR
+from legged_lab.sensors.volume_points import Grid3dPointsGeneratorCfg, VolumePointsCfg
 
 ##
 # Pre-defined configs
@@ -114,6 +116,20 @@ class G1AmpRewards:
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
         },
     )
+    foot_stair_intrusion = RewTerm(
+        func=mdp.volume_points_penetration_feet,
+        weight=-1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("foot_volume_points"),
+            "tolerance": 0.0,
+            "normal_penalty_scale": 1.0,
+            "transition_penalty_scale": 2.0,
+            "enable_terrain_foot_weights": True,
+            "stairs_weight_min": 0.2,
+            "stairs_weight_max": 1.0,
+            "heel_weight_scale": 1.0,
+        },
+    )
 
     # Soft collision penalty for arm links (wrists/elbows). Previously these were in the
     # base_contact termination, which forced the policy into weird arm postures to avoid ever
@@ -165,6 +181,18 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # __post_init__; max_init_terrain_level=5 lets envs start spread across difficulties
         # and progress via the curriculum.
         self.scene.terrain.max_init_terrain_level = 5
+        edge_obstacle = self.scene.terrain.virtual_obstacles.get("stair_edges")
+        if edge_obstacle is not None and self.scene.terrain.terrain_generator is not None:
+            terrain_generator = self.scene.terrain.terrain_generator
+            edge_obstacle.terrain_tile_size = terrain_generator.size
+            edge_obstacle.terrain_grid_shape = (terrain_generator.num_rows, terrain_generator.num_cols)
+            edge_obstacle.sub_terrain_border_width = max(
+                (
+                    getattr(sub_terrain_cfg, "border_width", 0.0)
+                    for sub_terrain_cfg in terrain_generator.sub_terrains.values()
+                ),
+                default=0.0,
+            )
 
         # ------------------------------------------------------
         # Height scanner + height_scan observation (rough only)
@@ -178,6 +206,21 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
             debug_vis=True,
             mesh_prim_paths=["/World/ground"],
+        )
+        self.scene.foot_volume_points = VolumePointsCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/.*_ankle_roll_link",
+            points_generator=Grid3dPointsGeneratorCfg(
+                x_min=-0.05,
+                x_max=0.13,
+                x_num=19,
+                y_min=-0.03,
+                y_max=0.03,
+                y_num=7,
+                z_min=-0.04,
+                z_max=-0.02,
+                z_num=3,
+            ),
+            debug_vis=False,
         )
         # height_scan goes into policy + critic ONLY — never disc/disc_demo (the reference
         # motions have no terrain channel). history_length=1 (single frame): a single 187-dim
@@ -277,6 +320,11 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         self.events.add_base_mass.params["asset_cfg"].body_names = "torso_link"
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["torso_link"]
+        self.events.register_virtual_obstacles = EventTerm(
+            func=mdp.register_virtual_obstacle_to_sensor,
+            mode="startup",
+            params={"sensor_cfgs": SceneEntityCfg("foot_volume_points")},
+        )
         # align_xy_to_origin=True: drop the reference motion's absolute xy so the robot
         # spawns at the sub-terrain origin, whose env_origins.z is the known ground height
         # on generator terrain — keeps root height aligned with no raycast. AMP does not

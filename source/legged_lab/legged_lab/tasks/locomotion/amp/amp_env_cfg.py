@@ -16,7 +16,6 @@ from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sensors import ContactSensorCfg, RayCasterCfg
 from isaaclab.sim import SimulationCfg
-from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils.configclass import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import UniformNoiseCfg as Unoise
@@ -25,6 +24,9 @@ import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab.envs.manager_based_amp_env_cfg import ManagerBasedAmpEnvCfg
 from legged_lab.managers import AnimationTermCfg as AnimTerm
 from legged_lab.managers import MotionDataTermCfg as MotionDataTerm
+from legged_lab.sensors.volume_points import Grid3dPointsGeneratorCfg, VolumePointsCfg
+from legged_lab.terrains.terrain_importer_cfg import TerrainImporterCfg
+from legged_lab.terrains.virtual_obstacle import EdgeCylinderCfg
 from isaaclab_tasks.utils import PresetCfg
 
 
@@ -89,6 +91,14 @@ class AmpSceneCfg(InteractiveSceneCfg):
             project_uvw=True,
             texture_scale=(0.25, 0.25),
         ),
+        virtual_obstacles={
+            "stair_edges": EdgeCylinderCfg(
+                angle_threshold=70.0,
+                cylinder_radius=0.2,
+                transition_edge_radius=0.05,
+                strict_step_edges=True,
+            )
+        },
         debug_vis=False,
     )
     # robots
@@ -101,6 +111,7 @@ class AmpSceneCfg(InteractiveSceneCfg):
     # RayCasterCfg on generator terrain, and the flat config keeps it None. See
     # g1_amp_rough_env_cfg / g1_amp_flat_env_cfg.
     height_scanner: RayCasterCfg = None
+    foot_volume_points: VolumePointsCfg = None
     # lights
     sky_light = AssetBaseCfg(
         prim_path="/World/skyLight",
@@ -515,6 +526,8 @@ class LocomotionAmpEnvCfg(ManagerBasedAmpEnvCfg):
             self.scene.contact_forces.update_period = self.sim.dt
         if getattr(self.scene, "height_scanner", None) is not None:
             self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+        if getattr(self.scene, "foot_volume_points", None) is not None:
+            self.scene.foot_volume_points.update_period = self.decimation * self.sim.dt
 
         # check if terrain levels curriculum is enabled - if so, enable curriculum for the
         # terrain generator (increasing difficulty). Mirrors the official velocity example.

@@ -37,8 +37,11 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
         # No terrain to perceive on flat ground: remove the height scanner, its policy/critic
         # observations, and the terrain-difficulty curriculum (mirrors the official flat cfg).
         self.scene.height_scanner = None
+        self.scene.foot_volume_points = None
         self.observations.policy.height_scan = None
         self.observations.critic.height_scan = None
+        self.rewards.foot_stair_intrusion = None
+        self.events.register_virtual_obstacles = None
         self.curriculum.terrain_levels = None
         # base_height reverts to absolute world-z on flat ground (the rough base pointed it at
         # the now-removed height_scanner). None => original root_height_below_minimum behavior.
@@ -55,8 +58,11 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
         self.scene.terrain.terrain_type = "plane"
         self.scene.terrain.terrain_generator = None
         self.scene.height_scanner = None
+        self.scene.foot_volume_points = None
         self.observations.policy.height_scan = None
         self.observations.critic.height_scan = None
+        self.rewards.foot_stair_intrusion = None
+        self.events.register_virtual_obstacles = None
         self.curriculum.terrain_levels = None
         self.terminations.base_height.params["sensor_cfg"] = None
         # This PLAY variant derives from the rough PLAY chain (not G1AmpFlatEnvCfg), so it inherits
