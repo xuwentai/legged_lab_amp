@@ -271,6 +271,19 @@ and **rough** generator terrain (`LeggedLab-Isaac-AMP-Rough-G1-v0`, with a heigh
 a terrain-difficulty curriculum). Pick whichever task id you want to train:
 
 ```bash
+
+conda activate isaaclab_history
+export ISAACSIM_PATH="$HOME/isaacsim6.0.0"
+export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
+${ISAACSIM_PYTHON_EXE} -c "print('Isaac Sim configuration is now complete.')"
+source $ISAACSIM_PATH/setup_conda_env.sh
+
+export ISAAC_PATH=/home/xuwentai/isaacsim6.0.0
+export CARB_APP_PATH=/home/xuwentai/isaacsim6.0.0/kit
+export EXP_PATH=/home/xuwentai/isaacsim6.0.0/apps
+export RESOURCE_NAME=IsaacSim
+export LD_PRELOAD=/home/xuwentai/isaacsim6.0.0/kit/libcarb.so
+
 # flat terrain
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000
 
