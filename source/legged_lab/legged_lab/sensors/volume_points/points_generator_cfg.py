@@ -1,7 +1,7 @@
 from dataclasses import MISSING
 from typing import Callable
 
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 from .points_generator import grid3d_points_generator
 

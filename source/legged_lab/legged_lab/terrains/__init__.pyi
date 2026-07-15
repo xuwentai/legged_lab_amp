@@ -29,7 +29,6 @@ __all__ = [
     # -- importer + virtual obstacle support --
     "TerrainImporter",
     "TerrainImporterCfg",
-    "EdgeCylinder",
     "EdgeCylinderCfg",
     "GreedyconcatEdgeCylinderCfg",
     "VirtualObstacleBase",
@@ -68,7 +67,6 @@ from .terrain_generator_cfg import FiledTerrainGeneratorCfg
 from .terrain_importer import TerrainImporter
 from .terrain_importer_cfg import TerrainImporterCfg
 from .virtual_obstacle import (
-    EdgeCylinder,
     EdgeCylinderCfg,
     GreedyconcatEdgeCylinderCfg,
     VirtualObstacleBase,

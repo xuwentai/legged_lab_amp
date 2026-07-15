@@ -4,17 +4,22 @@ from dataclasses import MISSING
 
 import isaaclab.sim as sim_utils
 from isaaclab.markers import VisualizationMarkersCfg
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
-from .edge_cylinder import EdgeCylinder
 from .virtual_obstacle_base import VirtualObstacleCfg
+
+# {DIR} below resolves to ``legged_lab.terrains.virtual_obstacle`` at
+# __post_init__ time.  The resulting ResolvableString is only resolved
+# (→ importlib.import_module → heavy imports of cv2/sklearn/warp) when
+# the cfg is first used inside launch_simulation.
+_EDGE_DIR = "{DIR}.edge_cylinder"
 
 
 @configclass
 class EdgeCylinderCfg(VirtualObstacleCfg):
     """Inflated-cylinder virtual obstacle generated from stair mesh edges."""
 
-    class_type: type = EdgeCylinder
+    class_type: type = _EDGE_DIR + ":EdgeCylinder"  # type: ignore[assignment]
     angle_threshold: float = 70.0
     min_face_height_diff: float = 0.01
     strict_step_edges: bool = True
@@ -46,8 +51,7 @@ class EdgeCylinderCfg(VirtualObstacleCfg):
 class GreedyconcatEdgeCylinderCfg(EdgeCylinderCfg):
     """Compatibility alias for configs copied from the reference repository."""
 
-    class_type: type = EdgeCylinder
+    class_type: type = _EDGE_DIR + ":EdgeCylinder"  # type: ignore[assignment]
     adjacent_angle_threshold: float = 30.0
     point_distance_threshold: float = 0.06
     min_points: int = 5
-

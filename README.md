@@ -275,7 +275,7 @@ a terrain-difficulty curriculum). Pick whichever task id you want to train:
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000
 
 # rough terrain
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000
+python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=4
 ```
 
 To train on a non-default GPU, set both `--device` and `agent.device`:

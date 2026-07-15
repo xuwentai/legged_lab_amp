@@ -5,7 +5,7 @@ import torch
 from _isaaclab_test_app import simulation_app
 
 from isaaclab.managers import ObservationGroupCfg, ObservationTermCfg
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 from legged_lab.managers import PreviewObservationManager
 

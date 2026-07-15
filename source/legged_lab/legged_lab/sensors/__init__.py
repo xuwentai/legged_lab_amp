@@ -1,2 +1,4 @@
 from .ray_caster_array_cfg import RayCasterArrayCfg
-from .volume_points import Grid3dPointsGeneratorCfg, VolumePoints, VolumePointsCfg, VolumePointsData
+
+# volume_points exports are NOT eagerly imported here — VolumePoints pulls pxr
+# via SensorBase. Import explicitly from legged_lab.sensors.volume_points instead.

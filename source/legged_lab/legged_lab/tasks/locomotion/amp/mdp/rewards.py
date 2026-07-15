@@ -101,7 +101,7 @@ def volume_points_penetration_feet(
     heel_weight_scale: float = 1.0,
 ) -> torch.Tensor:
     """Penalize foot volume-point penetration into inflated stair-edge cylinders."""
-    from legged_lab.sensors.volume_points import VolumePoints
+    from legged_lab.sensors.volume_points.volume_points import VolumePoints
     from legged_lab.sensors.volume_points.points_generator import grid3d_points_generator
 
     volume_sensor: VolumePoints = env.scene.sensors[sensor_cfg.name]

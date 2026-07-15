@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
-import omni.physics.tensors.impl.api as physx
 import torch
 
 import isaaclab.sim as sim_utils
@@ -56,11 +55,26 @@ class VolumePoints(SensorBase):
 
     def _initialize_impl(self):
         super()._initialize_impl()
+        import omni.physics.tensors.api as physx
+
         self._physics_sim_view = physx.create_simulation_view(self._backend)
         self._physics_sim_view.set_subspace_roots("/")
 
+        # Resolve a template prim for body-name discovery.  When a clone plan
+        # is active, _parent_prims is intentionally empty (the plan provides
+        # the env count and prim layout).  In that case we use the first
+        # env's Robot prim as template.
         leaf_pattern = self.cfg.prim_path.rsplit("/", 1)[-1]
-        template_prim_path = self._parent_prims[0].GetPath().pathString
+        if self._parent_prims:
+            template_prim_path = self._parent_prims[0].GetPath().pathString
+        else:
+            env_prim_path_expr = self.cfg.prim_path.rsplit("/", 1)[0]
+            all_envs = sim_utils.find_matching_prims(env_prim_path_expr)
+            if not all_envs:
+                raise RuntimeError(
+                    f"VolumePoints sensor at '{self.cfg.prim_path}' could not find any environment prims."
+                )
+            template_prim_path = all_envs[0].GetPath().pathString
         body_names = []
         for prim in sim_utils.find_matching_prims(template_prim_path + "/" + leaf_pattern):
             body_names.append(prim.GetPath().pathString.rsplit("/", 1)[-1])
