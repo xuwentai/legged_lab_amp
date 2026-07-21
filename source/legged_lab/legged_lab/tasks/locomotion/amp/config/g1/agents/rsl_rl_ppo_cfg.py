@@ -1,7 +1,8 @@
 from isaaclab.utils.configclass import configclass
 from isaaclab_rl.rsl_rl import RslRlMLPModelCfg, RslRlOnPolicyRunnerCfg, RslRlSymmetryCfg
 
-from legged_lab.rsl_rl import RslRlAmpCfg, RslRlPpoAmpAlgorithmCfg
+from legged_lab.rsl_rl import RslRlAMEEncoderModelCfg, RslRlAmpCfg, RslRlPpoAmpAlgorithmCfg
+from legged_lab.tasks.locomotion.amp.ame_cfg import G1_AME_MAP_SCAN_DIM, G1_AME_MAP_SCAN_HISTORY_LENGTH
 from legged_lab.tasks.locomotion.amp.mdp.symmetry import g1
 
 
@@ -24,17 +25,29 @@ class G1AmpRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         "discriminator_demonstration": ["disc_demo"],
     }
 
-    # Modular actor (stochastic) and critic (deterministic) — v3 / rsl-rl 5.x style.
-    actor = RslRlMLPModelCfg(
+    # Reference AME setup: CNN terrain features and proprioceptive cross-attention.
+    actor = RslRlAMEEncoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
         distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
+        map_scan_dim=G1_AME_MAP_SCAN_DIM,
+        map_scan_history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
+        mha_dim=64,
+        num_heads=16,
+        cnn_downsample=False,
+        attach_global=False,
     )
-    critic = RslRlMLPModelCfg(
+    critic = RslRlAMEEncoderModelCfg(
         hidden_dims=[512, 256, 128],
         activation="elu",
         obs_normalization=False,
+        map_scan_dim=G1_AME_MAP_SCAN_DIM,
+        map_scan_history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
+        mha_dim=64,
+        num_heads=16,
+        cnn_downsample=False,
+        attach_global=False,
     )
 
     algorithm = RslRlPpoAmpAlgorithmCfg(
@@ -83,7 +96,20 @@ class G1AmpFlatPPORunnerCfg(G1AmpRoughPPORunnerCfg):
 
         self.experiment_name = "g1_amp_flat"
 
+        # Flat environments remove height_scan, so retain the original MLP models.
+        self.actor = RslRlMLPModelCfg(
+            hidden_dims=[512, 256, 128],
+            activation="elu",
+            obs_normalization=False,
+            distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
+        )
+        self.critic = RslRlMLPModelCfg(
+            hidden_dims=[512, 256, 128],
+            activation="elu",
+            obs_normalization=False,
+        )
+
         # flat keeps disc_update_interval=5: the discriminator does not over-saturate on flat
-        # (success_rate converges to ~1.0), so no need to slow it. The rough base sets 8; revert
+        # (success_rate converges to ~1.0), so no need to slow it. The rough base sets 10; revert
         # it here so flat behavior is unchanged.
         self.algorithm.amp_cfg.disc_update_interval = 5

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import torch
 from typing import TYPE_CHECKING
+
+import torch
 
 import isaaclab.utils.math as math_utils
 from isaaclab.managers import SceneEntityCfg
@@ -9,9 +10,37 @@ from isaaclab.managers import SceneEntityCfg
 if TYPE_CHECKING:
     from isaaclab.assets import Articulation  # runtime class, guarded per v3 pattern
     from isaaclab.envs import ManagerBasedEnv
+    from isaaclab.sensors import RayCaster
 
     from legged_lab.envs import ManagerBasedAnimationEnv
     from legged_lab.managers import AnimationTerm
+
+
+def height_scan_xyz(
+    env: ManagerBasedEnv,
+    sensor_cfg: SceneEntityCfg,
+    offset: float = 0.5,
+) -> torch.Tensor:
+    """Return yaw-frame ``(x, y, z)`` terrain points with a height bias.
+
+    The horizontal coordinates retain the scanner's forward offset. The vertical
+    coordinate matches Isaac Lab's scalar height scan convention:
+    ``sensor_z - hit_z - offset``.
+    """
+    sensor: RayCaster = env.scene.sensors[sensor_cfg.name]
+    sensor_pos_w = getattr(sensor.data.pos_w, "torch", sensor.data.pos_w)
+    sensor_quat_w = getattr(sensor.data.quat_w, "torch", sensor.data.quat_w)
+    ray_hits_w = getattr(sensor.data.ray_hits_w, "torch", sensor.data.ray_hits_w)
+
+    num_envs, num_rays = ray_hits_w.shape[:2]
+    relative_pos_w = ray_hits_w - sensor_pos_w.unsqueeze(1)
+    yaw_quat_inv = math_utils.quat_conjugate(math_utils.yaw_quat(sensor_quat_w))
+    coords = math_utils.quat_apply(
+        yaw_quat_inv.unsqueeze(1).expand(num_envs, num_rays, 4).reshape(-1, 4),
+        relative_pos_w.reshape(-1, 3),
+    ).reshape(num_envs, num_rays, 3)
+    coords[..., 2] = -coords[..., 2] - offset
+    return coords.reshape(num_envs, -1)
 
 
 def root_local_rot_tan_norm(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:

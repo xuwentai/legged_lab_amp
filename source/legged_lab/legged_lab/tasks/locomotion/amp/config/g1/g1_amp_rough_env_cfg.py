@@ -18,6 +18,13 @@ from legged_lab.sensors.volume_points import Grid3dPointsGeneratorCfg, VolumePoi
 # Pre-defined configs
 ##
 from legged_lab.assets.unitree import UNITREE_G1_29DOF_CFG
+from legged_lab.tasks.locomotion.amp.ame_cfg import (
+    G1_AME_HEIGHT_OFFSET,
+    G1_AME_MAP_SCAN_HISTORY_LENGTH,
+    G1_AME_SCAN_POSITION_OFFSET,
+    G1_AME_SCAN_RESOLUTION,
+    G1_AME_SCAN_SIZE,
+)
 from legged_lab.tasks.locomotion.amp.amp_env_cfg import LocomotionAmpEnvCfg
 from legged_lab.terrains.config.rough import ROUGH_PERLIN_TERRAINS_CFG  # isort: skip
 
@@ -197,13 +204,13 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # Height scanner + height_scan observation (rough only)
         # ------------------------------------------------------
-        # RayCaster grid under the torso (G1's base body). Copied from the official velocity
-        # example (GridPatternCfg 0.1m / 1.6x1.0m), with prim_path on torso_link.
+        # AME terrain map from the reference G1 setup: a 16x11 xyz grid covering
+        # [0.0, 0.6] m forward and [-0.2, 0.2] m laterally from the torso.
         self.scene.height_scanner = RayCasterCfg(
             prim_path="{ENV_REGEX_NS}/Robot/torso_link",
-            offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
+            offset=RayCasterCfg.OffsetCfg(pos=G1_AME_SCAN_POSITION_OFFSET),
             ray_alignment="yaw",
-            pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+            pattern_cfg=patterns.GridPatternCfg(resolution=G1_AME_SCAN_RESOLUTION, size=G1_AME_SCAN_SIZE),
             debug_vis=True,
             mesh_prim_paths=["/World/ground"],
         )
@@ -222,23 +229,21 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             ),
             debug_vis=False,
         )
-        # height_scan goes into policy + critic ONLY — never disc/disc_demo (the reference
-        # motions have no terrain channel). history_length=1 (single frame): a single 187-dim
-        # grid keeps the symmetry left-right flip simple (matches the official anymal impl,
-        # which mirrors a single-frame height_scan). Proprio terms still use history 5.
+        # The xyz map goes into policy + critic only. A 0.5 m vertical bias matches the
+        # reference AME normalization; the discriminator never receives terrain data.
         self.observations.policy.height_scan = ObsTerm(
-            func=mdp.height_scan,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
-            noise=Unoise(n_min=-0.1, n_max=0.1),
+            func=mdp.height_scan_xyz,
+            params={"sensor_cfg": SceneEntityCfg("height_scanner"), "offset": G1_AME_HEIGHT_OFFSET},
+            noise=Unoise(n_min=-0.03, n_max=0.03),
             clip=(-1.0, 1.0),
-            history_length=1,
+            history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
             flatten_history_dim=True,
         )
         self.observations.critic.height_scan = ObsTerm(
-            func=mdp.height_scan,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+            func=mdp.height_scan_xyz,
+            params={"sensor_cfg": SceneEntityCfg("height_scanner"), "offset": G1_AME_HEIGHT_OFFSET},
             clip=(-1.0, 1.0),
-            history_length=1,
+            history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
             flatten_history_dim=True,
         )
 

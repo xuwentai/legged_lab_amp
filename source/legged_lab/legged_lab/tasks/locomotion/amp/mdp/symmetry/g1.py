@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import torch
 from tensordict import TensorDict
-from typing import TYPE_CHECKING
+
+from legged_lab.tasks.locomotion.amp.ame_cfg import G1_AME_MAP_SCAN_DIM
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -99,10 +102,8 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
     JOINT_POS_DIM = joint_num
     JOINT_VEL_DIM = joint_num
     LAST_ACTIONS_DIM = joint_num
-    # height_scan grid: GridPatternCfg ordering "xy", size (1.6, 1.0), resolution 0.1
-    # -> 11 rows (y) x 17 cols (x) = 187 points, single frame (history_length=1).
-    HEIGHT_SCAN_ROWS = 11  # y axis (left-right)
-    HEIGHT_SCAN_COLS = 17  # x axis (front-back)
+    # AME xyz scan: GridPatternCfg ordering "xy", size (0.6, 0.4), resolution 0.04.
+    HEIGHT_SCAN_COLS, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COORD_DIM = G1_AME_MAP_SCAN_DIM
 
     end_idx = 0
     # ang vel
@@ -135,19 +136,18 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
         start_idx = end_idx
         end_idx = start_idx + LAST_ACTIONS_DIM
         obs[:, start_idx:end_idx] = _switch_g1_29dof_joints_left_right(obs[:, start_idx:end_idx])
-    # height scan (rough terrain only; single frame, history_length=1). Left-right mirror =
-    # flip the grid along its y (row) axis. Hard-coded for GridPatternCfg ordering "xy" and
-    # size (1.6, 1.0) -> 11 rows (y) x 17 cols (x) = 187 points. Matches the official anymal
-    # symmetry impl. Guarded by active_terms so flat (no height_scan) skips this cleanly.
+    # Mirror the grid along y and negate the local y coordinate channel. Flat tasks
+    # have no height_scan term and skip this block.
     if "height_scan" in env.observation_manager.active_terms["policy"]:
         start_idx = end_idx
-        end_idx = start_idx + HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS
-        obs[:, start_idx:end_idx] = (
-            obs[:, start_idx:end_idx]
-            .view(-1, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COLS)
-            .flip(dims=[1])
-            .view(-1, HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS)
+        scan_dim = HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS * HEIGHT_SCAN_COORD_DIM
+        end_idx = start_idx + scan_dim
+        height_scan = obs[:, start_idx:end_idx].view(
+            -1, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COLS, HEIGHT_SCAN_COORD_DIM
         )
+        mirrored_height_scan = height_scan.flip(dims=[1])
+        mirrored_height_scan[..., 1] = -mirrored_height_scan[..., 1]
+        obs[:, start_idx:end_idx] = mirrored_height_scan.reshape(-1, scan_dim)
 
     return obs
 

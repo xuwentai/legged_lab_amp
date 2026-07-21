@@ -194,7 +194,7 @@ class ObservationsCfg:
         )
         actions = ObsTerm(func=mdp.last_action, history_length=5, flatten_history_dim=True)
         # height_scan is added by the rough config (g1_amp_rough_env_cfg); it uses a
-        # shorter per-term history (3) than the proprioceptive terms (5). This only works
+        # shorter per-term history (1) than the proprioceptive terms (5). This only works
         # because the group-level history_length is None below — a non-None group history
         # would override every term's history_length. See __post_init__.
         # key_body_pos_b = ObsTerm(
@@ -208,7 +208,7 @@ class ObservationsCfg:
 
         def __post_init__(self):
             # history_length is set per-term (all proprio terms use 5) rather than at the
-            # group level, so the rough config can give height_scan its own history (3).
+            # group level, so the rough config can give height_scan its own history (1).
             # A non-None group history_length would override every term's setting.
             self.history_length = None
             self.enable_corruption = True
@@ -242,7 +242,7 @@ class ObservationsCfg:
             history_length=5,
             flatten_history_dim=True,
         )
-        # height_scan is added by the rough config with per-term history 3 (see PolicyCfg).
+        # height_scan is added by the rough config with per-term history 1 (see PolicyCfg).
 
         def __post_init__(self):
             # history set per-term (see PolicyCfg) so the rough config can give height_scan

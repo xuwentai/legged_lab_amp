@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from isaaclab.utils.configclass import configclass
-from isaaclab_rl.rsl_rl import RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
+from isaaclab_rl.rsl_rl import RslRlMLPModelCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
 
 from .amp_cfg import RslRlAmpCfg
 
@@ -26,6 +26,19 @@ class RslRlPpoActorCriticConv2dCfg(RslRlPpoActorCriticCfg):
 
     conv_linear_output_size: int = 16
     """Output size of the linear layer after the convolutional features are flattened."""
+
+
+@configclass
+class RslRlAMEEncoderModelCfg(RslRlMLPModelCfg):
+    """Configuration for the AME CNN and terrain cross-attention model."""
+
+    class_name: str = "legged_lab.rsl_rl.models.ame_encoder:AMEEncoder"
+    map_scan_dim: tuple[int, int, int] = (16, 11, 3)
+    map_scan_history_length: int = 1
+    mha_dim: int = 64
+    num_heads: int = 16
+    cnn_downsample: bool = False
+    attach_global: bool = False
 
 
 ############################
