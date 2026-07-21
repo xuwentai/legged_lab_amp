@@ -94,7 +94,7 @@ class AmpSceneCfg(InteractiveSceneCfg):
         virtual_obstacles={
             "stair_edges": EdgeCylinderCfg(
                 angle_threshold=70.0,
-                cylinder_radius=0.2,
+                cylinder_radius=0.03,
                 transition_edge_radius=0.05,
                 strict_step_edges=True,
             )

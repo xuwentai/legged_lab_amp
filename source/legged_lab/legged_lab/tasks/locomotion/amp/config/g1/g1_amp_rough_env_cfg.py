@@ -227,7 +227,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
                 z_max=-0.02,
                 z_num=3,
             ),
-            debug_vis=False,
+            debug_vis=True,
         )
         # The xyz map goes into policy + critic only. A 0.5 m vertical bias matches the
         # reference AME normalization; the discriminator never receives terrain data.
@@ -386,6 +386,12 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
 class G1AmpRoughEnvCfg_PLAY(G1AmpRoughEnvCfg):
     def __post_init__(self):
         super().__post_init__()
+
+
+        # self.scene.terrain.debug_vis = True
+
+        # if self.scene.foot_volume_points is not None:
+        #     self.scene.foot_volume_points.debug_vis = True
 
         self.scene.num_envs = 48
         self.scene.env_spacing = 2.5

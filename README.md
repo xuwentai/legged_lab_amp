@@ -274,8 +274,28 @@ a terrain-difficulty curriculum). Pick whichever task id you want to train:
 # flat terrain
 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 --headless --max_iterations 50000
 
+
+# 1. 创建 _isaac_sim 软链接（只需做一次）
+cd /home/xuwentai/legged_lab_amp
+ln -s /home/xuwentai/isaacsim6.0.0 _isaac_sim
+
+# 2. 每次运行前 source Isaac Sim 环境
+conda activate leggedamp
+source /home/xuwentai/isaacsim6.0.0/setup_conda_env.sh
+export ISAAC_PATH=/home/xuwentai/isaacsim6.0.0
+export EXP_PATH=/home/xuwentai/isaacsim6.0.0/apps
+export CARB_APP_PATH=/home/xuwentai/isaacsim6.0.0/kit
+
+
+
 # rough terrain
-python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=4
+CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=8192
+
+
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-Play-v0 \
+    --num_envs 64 --video --viz kit \
+    --checkpoint logs/rsl_rl/g1_amp_rough/2026-07-21_16-45-54/model_200.pt
+
 ```
 
 To train on a non-default GPU, set both `--device` and `agent.device`:
@@ -306,9 +326,10 @@ python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 \
     --checkpoint logs/rsl_rl/g1_amp_flat/run_name/model_xxx.pt
 
 # rough terrain
-python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
+python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-Play-v0 \
     --num_envs 64 --video --viz kit \
-    --checkpoint logs/rsl_rl/g1_amp_rough/run_name/model_xxx.pt
+    --checkpoint logs/rsl_rl/g1_amp_rough/2026-07-21_16-45-54/model_200.pt
+
 ```
 
 The video will be saved in the `logs/rsl_rl/experiment_name/run_name/videos/play` directory.
@@ -320,7 +341,7 @@ then chases the followed body (default `torso_link`, env 0) in a third-person vi
 # smooth position-only follow (camera keeps a fixed viewing direction)
 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
     --viz kit --video --follow_cam \
-    --checkpoint logs/rsl_rl/g1_amp_rough/run_name/model_xxx.pt
+    --checkpoint logs/rsl_rl/g1_amp_rough/2026-07-21_16-45-54/model_0.pt
 
 # follow AND rotate with the robot's heading, damping the per-step yaw jitter
 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
@@ -339,16 +360,7 @@ pass `--video` or `--headless` in this mode (Viser is a kitless backend and need
 ```bash
 
 
-# 1. 创建 _isaac_sim 软链接（只需做一次）
-cd /home/airs/legged_lab_amp
-ln -s /home/airs/isaacsim6.0.0 _isaac_sim
 
-# 2. 每次运行前 source Isaac Sim 环境
-conda activate leggedamp
-source /home/airs/isaacsim6.0.0/setup_conda_env.sh
-export ISAAC_PATH=/home/airs/isaacsim6.0.0
-export EXP_PATH=/home/airs/isaacsim6.0.0/apps
-export CARB_APP_PATH=/home/airs/isaacsim6.0.0/kit
 
 # flat terrain — replace the checkpoint path with the path to your trained model
 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Flat-G1-v0 \
