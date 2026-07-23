@@ -289,7 +289,7 @@ export CARB_APP_PATH=/home/xuwentai/isaacsim6.0.0/kit
 
 
 # rough terrain
-CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=8192
+CUDA_VISIBLE_DEVICES=1 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=4096
 
 
 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-Play-v0 \

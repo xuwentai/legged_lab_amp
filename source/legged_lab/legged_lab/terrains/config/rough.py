@@ -121,22 +121,22 @@ ROUGH_PERLIN_TERRAINS_CFG = TerrainGeneratorCfg(
         # --- sloped tiles: Hf*PyramidSloped -> Perlin*PyramidSloped ---
         # slope_range / platform_width / border_width match the official values; a
         # light perlin_cfg overlay keeps the incline surface smooth.
-        "hf_pyramid_slope": perlin_gen.PerlinPyramidSlopedTerrainCfg(
-            proportion=0.1,
-            slope_range=(0.0, 0.4),
-            platform_width=2.0,
-            border_width=0.25,
-            perlin_cfg=_perlin_overlay(),
-            **_NO_WALL,
-        ),
-        "hf_pyramid_slope_inv": perlin_gen.PerlinInvertedPyramidSlopedTerrainCfg(
-            proportion=0.1,
-            slope_range=(0.0, 0.4),
-            platform_width=2.0,
-            border_width=0.25,
-            perlin_cfg=_perlin_overlay(),
-            **_NO_WALL,
-        ),
+        # "hf_pyramid_slope": perlin_gen.PerlinPyramidSlopedTerrainCfg(
+        #     proportion=0.1,
+        #     slope_range=(0.0, 0.4),
+        #     platform_width=2.0,
+        #     border_width=0.25,
+        #     perlin_cfg=_perlin_overlay(),
+        #     **_NO_WALL,
+        # ),
+        # "hf_pyramid_slope_inv": perlin_gen.PerlinInvertedPyramidSlopedTerrainCfg(
+        #     proportion=0.1,
+        #     slope_range=(0.0, 0.4),
+        #     platform_width=2.0,
+        #     border_width=0.25,
+        #     perlin_cfg=_perlin_overlay(),
+        #     **_NO_WALL,
+        # ),
     },
 )
 """Rough preset with foot-catching height-field tiles replaced by smooth Perlin ports."""
