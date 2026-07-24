@@ -197,13 +197,13 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # Height scanner + height_scan observation (rough only)
         # ------------------------------------------------------
-        # RayCaster grid under the torso (G1's base body). Copied from the official velocity
-        # example (GridPatternCfg 0.1m / 1.6x1.0m), with prim_path on torso_link.
+        # RayCaster grid ahead of the torso (G1's base body): 11x11 points at 4 cm spacing,
+        # centered 20 cm forward in the torso frame.
         self.scene.height_scanner = RayCasterCfg(
             prim_path="{ENV_REGEX_NS}/Robot/torso_link",
-            offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
+            offset=RayCasterCfg.OffsetCfg(pos=(0.2, 0.0, 20.0)),
             ray_alignment="yaw",
-            pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
+            pattern_cfg=patterns.GridPatternCfg(resolution=0.04, size=[0.4, 0.4]),
             debug_vis=True,
             mesh_prim_paths=["/World/ground"],
         )
@@ -223,7 +223,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             debug_vis=False,
         )
         # height_scan goes into policy + critic ONLY — never disc/disc_demo (the reference
-        # motions have no terrain channel). history_length=1 (single frame): a single 187-dim
+        # motions have no terrain channel). history_length=1 (single frame): a single 121-dim
         # grid keeps the symmetry left-right flip simple (matches the official anymal impl,
         # which mirrors a single-frame height_scan). Proprio terms still use history 5.
         self.observations.policy.height_scan = ObsTerm(

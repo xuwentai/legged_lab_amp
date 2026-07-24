@@ -99,10 +99,10 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
     JOINT_POS_DIM = joint_num
     JOINT_VEL_DIM = joint_num
     LAST_ACTIONS_DIM = joint_num
-    # height_scan grid: GridPatternCfg ordering "xy", size (1.6, 1.0), resolution 0.1
-    # -> 11 rows (y) x 17 cols (x) = 187 points, single frame (history_length=1).
+    # height_scan grid: GridPatternCfg ordering "xy", size (0.4, 0.4), resolution 0.04
+    # -> 11 rows (y) x 11 cols (x) = 121 points, single frame (history_length=1).
     HEIGHT_SCAN_ROWS = 11  # y axis (left-right)
-    HEIGHT_SCAN_COLS = 17  # x axis (front-back)
+    HEIGHT_SCAN_COLS = 11  # x axis (front-back)
 
     end_idx = 0
     # ang vel
@@ -137,8 +137,8 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
         obs[:, start_idx:end_idx] = _switch_g1_29dof_joints_left_right(obs[:, start_idx:end_idx])
     # height scan (rough terrain only; single frame, history_length=1). Left-right mirror =
     # flip the grid along its y (row) axis. Hard-coded for GridPatternCfg ordering "xy" and
-    # size (1.6, 1.0) -> 11 rows (y) x 17 cols (x) = 187 points. Matches the official anymal
-    # symmetry impl. Guarded by active_terms so flat (no height_scan) skips this cleanly.
+    # size (0.4, 0.4) -> 11 rows (y) x 11 cols (x) = 121 points. Guarded by active_terms
+    # so flat (no height_scan) skips this cleanly.
     if "height_scan" in env.observation_manager.active_terms["policy"]:
         start_idx = end_idx
         end_idx = start_idx + HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS
