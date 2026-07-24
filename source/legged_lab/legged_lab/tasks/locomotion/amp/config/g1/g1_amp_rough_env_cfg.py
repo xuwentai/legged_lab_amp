@@ -123,20 +123,21 @@ class G1AmpRewards:
             "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
         },
     )
-    foot_stair_intrusion = RewTerm(
-        func=mdp.volume_points_penetration_feet,
-        weight=-1.0,
-        params={
-            "sensor_cfg": SceneEntityCfg("foot_volume_points"),
-            "tolerance": 0.0,
-            "normal_penalty_scale": 1.0,
-            "transition_penalty_scale": 2.0,
-            "enable_terrain_foot_weights": True,
-            "stairs_weight_min": 0.2,
-            "stairs_weight_max": 1.0,
-            "heel_weight_scale": 1.0,
-        },
-    )
+    #pengzhang
+    # foot_stair_intrusion = RewTerm(
+    #     func=mdp.volume_points_penetration_feet,
+    #     weight=-1.0,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg("foot_volume_points"),
+    #         "tolerance": 0.0,
+    #         "normal_penalty_scale": 1.0,
+    #         "transition_penalty_scale": 2.0,
+    #         "enable_terrain_foot_weights": True,
+    #         "stairs_weight_min": 0.2,
+    #         "stairs_weight_max": 1.0,
+    #         "heel_weight_scale": 1.0,
+    #     },
+    # )
 
     # Soft collision penalty for arm links (wrists/elbows). Previously these were in the
     # base_contact termination, which forced the policy into weird arm postures to avoid ever
@@ -262,6 +263,9 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         self.motion_data.motion_dataset.motion_data_dir = os.path.join(
             LEGGED_LAB_ROOT_DIR, "data", "MotionData", "g1_29dof", "amp", "walk_and_run"
         )
+        # Pure-walking dataset: all C-series run clips are excluded so the discriminator only
+        # ever rewards walking kinematics. MotionDataManager loads ONLY the files listed here
+        # (extra .pkl files in the directory are ignored), so no data files need to be moved.
         self.motion_data.motion_dataset.motion_data_weights = {
             "B10_-__Walk_turn_left_45_stageii": 1.0,
             "B11_-__Walk_turn_left_135_stageii": 1.0,
@@ -272,20 +276,6 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             "B23_-__side_step_right_stageii": 1.0,
             "B4_-_Stand_to_Walk_backwards_stageii": 1.0,
             "B9_-__Walk_turn_left_90_stageii": 1.0,
-            "C11_-_run_turn_left_90_stageii": 1.0,
-            "C12_-_run_turn_left_45_stageii": 1.0,
-            "C13_-_run_turn_left_135_stageii": 1.0,
-            "C14_-_run_turn_right_90_stageii": 1.0,
-            "C15_-_run_turn_right_45_stageii": 1.0,
-            "C16_-_run_turn_right_135_stageii": 1.0,
-            "C17_-_run_change_direction_stageii": 1.0,
-            "C1_-_stand_to_run_stageii": 1.0,
-            "C3_-_run_stageii": 1.0,
-            "C4_-_run_to_walk_a_stageii": 1.0,
-            "C5_-_walk_to_run_stageii": 1.0,
-            "C6_-_stand_to_run_backwards_stageii": 1.0,
-            "C8_-_run_backwards_to_stand_stageii": 1.0,
-            "C9_-_run_backwards_turn_run_forward_stageii": 1.0,
             "Walk_B10_-_Walk_turn_left_45_stageii": 1.0,
             "Walk_B13_-_Walk_turn_right_45_stageii": 1.0,
             "Walk_B15_-_Walk_turn_around_stageii": 1.0,
@@ -344,18 +334,19 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # ------------------------------------------------------
         # Commands
         # ------------------------------------------------------
-        # Ranges chosen to match what the walk_and_run AMP data can actually *sustain*, not
+        # Ranges chosen to match what the walk-only AMP data can actually *sustain*, not
         # its instantaneous tails (body frame, measured offline on the reference clips):
-        #   v_x lower bound 0.0: the raw p1 is ~-2.0, but those fast-backward frames are
+        #   v_x lower bound -0.3: the raw p1 is ~-2.0, but those fast-backward frames are
         #     transient turn/pivot instants -- NO clip sustains straight (|w_z|<0.5) backward
-        #     v_x<-1.0 for even 0.5 s. The one sustained straight backward walk (B4 / Walk_B4
-        #     stand-to-walk-back) only reaches v_x ~ -0.3..-0.45, too little / too rare to
-        #     imitate reliably, so we drop backward commands entirely: 0.0 removes the
-        #     discriminator-less backward-hop failure mode outright. (was -2.0)
+        #     v_x<-1.0 for even 0.5 s. The only sustained straight backward walking is in the
+        #     two B4 stand-to-walk-back clips, which sustain v_x ~ -0.3..-0.45. Backward
+        #     commands are enabled but clamped to -0.3 (conservative end of the demonstrated
+        #     range): anything faster has no demo coverage and the policy falls back to a
+        #     discriminator-less backward-hop. (was -2.0, then 0.0)
         #   v_y (-0.5, 0.5): matches the side-step clips (p1/p99 ~ -0.48 / 0.53).
         #   w_z (-1.5, 1.5): covers the fast turn-around / 135deg clips (p1/p99 ~ -1.55 / 1.65).
         # The reset-aligned command in AmpVelocityCommand is clamped to these same ranges.
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.0, 3.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.3, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.5, 1.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
@@ -409,7 +400,7 @@ class G1AmpRoughEnvCfg_PLAY(G1AmpRoughEnvCfg):
             # self.scene.terrain.terrain_generator.sub_terrains["hf_pyramid_slope_inv"].proportion = 0.0
             
 
-        self.commands.base_velocity.ranges.lin_vel_x = (1.5, 3.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (0.5, 0.5)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (-0.0, 0.0)
         self.commands.base_velocity.ranges.heading =  (-math.pi, math.pi)

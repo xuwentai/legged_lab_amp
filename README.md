@@ -289,13 +289,27 @@ export CARB_APP_PATH=/home/xuwentai/isaacsim6.0.0/kit
 
 
 # rough terrain
-CUDA_VISIBLE_DEVICES=1 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=4096
+CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=4096
+CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/train.py \
+  --task LeggedLab-Isaac-AMP-Rough-G1-v0 \
+  --headless \
+  --max_iterations 50000 \
+  --num_envs 2048 \
+  --resume \
+  --load_run 2026-07-22_15-12-24 \
+  --checkpoint model_6200.pt
 
 
-python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-Play-v0 \
+CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/train.py --task LeggedLab-Isaac-AMP-Rough-G1-v0 --headless --max_iterations 50000 --num_envs=2048
+
+CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-Play-v0 \
+    --num_envs 64 --viz kit \
+    --checkpoint logs/rsl_rl/g1_amp_rough/2026-07-23_16-08-24/model_11600.pt
+
+
+CUDA_VISIBLE_DEVICES=2 python scripts/rsl_rl/play.py --task LeggedLab-Isaac-AMP-Rough-G1-Play-v0 \
     --num_envs 64 --video --viz kit \
-    --checkpoint logs/rsl_rl/g1_amp_rough/2026-07-21_16-45-54/model_200.pt
-
+    --checkpoint logs/rsl_rl/g1_amp_rough/2026-07-23_16-08-24/model_11600.pt
 ```
 
 To train on a non-default GPU, set both `--device` and `agent.device`:

@@ -112,7 +112,9 @@ class VolumePoints(SensorBase):
         body_vels = self.body_physx_view.get_velocities().view(-1, self.num_bodies, 6)[env_ids]
 
         self._data.pos_w[env_ids] = body_poses[..., :3]
-        self._data.quat_w[env_ids] = math_utils.convert_quat(body_poses[..., 3:], to="wxyz")
+        # PhysX tensor API get_transforms() already returns quaternion in wxyz convention;
+        # an extra convert_quat(..., to="wxyz") would roll the components and corrupt the pose.
+        self._data.quat_w[env_ids] = body_poses[..., 3:]
         self._data.vel_w[env_ids] = body_vels[..., :3]
         self._data.ang_vel_w[env_ids] = body_vels[..., 3:]
 

@@ -40,7 +40,11 @@ def height_scan_xyz(
         relative_pos_w.reshape(-1, 3),
     ).reshape(num_envs, num_rays, 3)
     coords[..., 2] = -coords[..., 2] - offset
-    return coords.reshape(num_envs, -1)
+    result = coords.reshape(num_envs, -1)
+    # ===== 新增：NaN 保护 =====
+    result = torch.nan_to_num(result, nan=0.0, posinf=1.0, neginf=-1.0)
+    # ==========================
+    return result
 
 
 def root_local_rot_tan_norm(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
