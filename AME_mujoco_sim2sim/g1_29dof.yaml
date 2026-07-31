@@ -1,0 +1,92 @@
+# G1 29-DoF MuJoCo deployment for LeggedLab-Isaac-AMP-Rough-G1-Play-v0.
+#
+# Policy observation layout (term-major, oldest history entry first):
+#   base_ang_vel             5 x 3   = 15
+#   root_local_rot_tan_norm  5 x 6   = 30
+#   velocity_commands       5 x 3   = 15
+#   joint_pos                5 x 29  = 145
+#   joint_vel                5 x 29  = 145
+#   actions                  5 x 29  = 145
+#   height_scan_xyz          1 x 11 x 11 x 3 = 363
+#   total                                      858
+
+xml_path: unitree_model/G1/29dof/g1_29dof_rev_1_0.xml
+
+simulation_duration: 600.0
+simulation_dt: 0.001
+control_decimation: 20
+
+num_actions: 29
+policy_history_length: 5
+height_scan_history_length: 1
+action_scale: 0.25
+clip_actions: 100.0
+action_ema_alpha: 1.0
+
+height_scan_body: torso_link
+height_scan_resolution: 0.04
+height_scan_size: [0.4, 0.4]
+height_scan_position_offset: [0.2, 0.0, 20.0]
+height_scan_height_offset: 0.5
+height_scan_frequency: 50.0
+
+initial_base_position: [0.0, 0.0, 0.8]
+command: [1.0, 0.0, 0.0]
+gamepad_deadzone: 0.15
+gamepad_command_gains: [0.7, 0.6, 1.0]
+print_interval: 50
+
+# Isaac Lab articulation joint order. This must match the policy action and
+# joint observation order used by g1_amp_rough_env_cfg.py.
+policy_joint_order:
+  - left_hip_pitch_joint
+  - right_hip_pitch_joint
+  - waist_yaw_joint
+  - left_hip_roll_joint
+  - right_hip_roll_joint
+  - waist_roll_joint
+  - left_hip_yaw_joint
+  - right_hip_yaw_joint
+  - waist_pitch_joint
+  - left_knee_joint
+  - right_knee_joint
+  - left_shoulder_pitch_joint
+  - right_shoulder_pitch_joint
+  - left_ankle_pitch_joint
+  - right_ankle_pitch_joint
+  - left_shoulder_roll_joint
+  - right_shoulder_roll_joint
+  - left_ankle_roll_joint
+  - right_ankle_roll_joint
+  - left_shoulder_yaw_joint
+  - right_shoulder_yaw_joint
+  - left_elbow_joint
+  - right_elbow_joint
+  - left_wrist_roll_joint
+  - right_wrist_roll_joint
+  - left_wrist_pitch_joint
+  - right_wrist_pitch_joint
+  - left_wrist_yaw_joint
+  - right_wrist_yaw_joint
+
+# UNITREE_G1_29DOF_CFG default joint positions in policy order.
+default_joint_angles:
+  [-0.10, -0.10, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+   0.30, 0.30, 0.30, 0.30, -0.20, -0.20, 0.25, -0.25, 0.0,
+   0.0, 0.0, 0.0, 0.97, 0.97, 0.15, -0.15, 0.0, 0.0, 0.0, 0.0]
+
+# UNITREE_G1_29DOF_CFG implicit actuator parameters in policy order.
+stiffness:
+  [100, 100, 200, 100, 100, 40, 100, 100, 40,
+   150, 150, 40, 40, 40, 40, 40, 40, 40,
+   40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
+
+damping:
+  [2, 2, 5, 2, 2, 5, 2, 2, 5,
+   4, 4, 1, 1, 2, 2, 1, 1, 2,
+   2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+effort_limits:
+  [88, 88, 88, 139, 139, 25, 88, 88, 25,
+   139, 139, 25, 25, 25, 25, 25, 25, 25,
+   25, 25, 25, 25, 25, 25, 25, 5, 5, 5, 5]
