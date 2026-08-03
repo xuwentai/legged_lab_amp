@@ -1,5 +1,8 @@
+from isaaclab.managers import RewardTermCfg as RewTerm
+from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils.configclass import configclass
 
+import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab.tasks.locomotion.amp.config.g1.g1_amp_rough_env_cfg import (
     G1AmpRoughEnvCfg,
     G1AmpRoughEnvCfg_PLAY,
@@ -41,6 +44,29 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
         self.observations.policy.height_scan = None
         self.observations.critic.height_scan = None
         self.rewards.foot_stair_intrusion = None
+        # Flat-only standing cleanup:
+        # 1) keep ankle joints near their default pose when command is near zero to suppress
+        #    in-place stepping during standstill;
+        # 2) keep the feet level on contact to reduce heel-only contact / floating toes.
+        self.rewards.joint_deviation_ankles = RewTerm(
+            func=mdp.stand_still_joint_deviation_l1,
+            weight=-0.2,
+            params={
+                "command_name": "base_velocity",
+                "command_threshold": 0.08,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=[".*_ankle_pitch_joint", ".*_ankle_roll_joint"]
+                ),
+            },
+        )
+        self.rewards.feet_orientation = RewTerm(
+            func=mdp.feet_orientation_l2,
+            weight=-2.0,
+            params={
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+                "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
+            },
+        )
         self.events.register_virtual_obstacles = None
         self.curriculum.terrain_levels = None
         # base_height reverts to absolute world-z on flat ground (the rough base pointed it at
@@ -62,6 +88,25 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
         self.observations.policy.height_scan = None
         self.observations.critic.height_scan = None
         self.rewards.foot_stair_intrusion = None
+        self.rewards.joint_deviation_ankles = RewTerm(
+            func=mdp.stand_still_joint_deviation_l1,
+            weight=-0.2,
+            params={
+                "command_name": "base_velocity",
+                "command_threshold": 0.08,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=[".*_ankle_pitch_joint", ".*_ankle_roll_joint"]
+                ),
+            },
+        )
+        self.rewards.feet_orientation = RewTerm(
+            func=mdp.feet_orientation_l2,
+            weight=-2.0,
+            params={
+                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+                "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_roll_link"),
+            },
+        )
         self.events.register_virtual_obstacles = None
         self.curriculum.terrain_levels = None
         self.terminations.base_height.params["sensor_cfg"] = None

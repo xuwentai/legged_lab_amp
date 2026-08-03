@@ -7,7 +7,8 @@ deploys it in MuJoCo with observation construction aligned to legged_lab BaseEnv
 
 Usage:
   cd AME_mujoco_sim2sim
-  python deploy_mujoco.py --policy_path ../logs/g1_rough/.../model_15700.pt
+  python deploy_mujoco.py
+  python deploy_mujoco.py --policy_path ../logs/rsl_rl/g1_amp_flat/2026-07-31_18-29-09/model_49999.pt
 """
 import time
 import os
@@ -23,6 +24,7 @@ import yaml
 import pygame
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_POLICY_PATH = "../logs/rsl_rl/g1_amp_flat/2026-07-31_18-29-09/model_49999.pt"
 
 # Add project root so rsl_rl is importable
 sys.path.insert(0, os.path.join(SCRIPT_DIR, ".."))
@@ -133,6 +135,19 @@ def _resolve_pd(name, key):
                 return val
     return 0.0
 
+
+def _cfg_get_compat(cfg, key, legacy_keys, default=None, required=False):
+    """Read a config value while supporting legacy key names."""
+    if key in cfg:
+        return cfg[key]
+    for legacy_key in legacy_keys:
+        if legacy_key in cfg:
+            return cfg[legacy_key]
+    if required:
+        searched = ", ".join([key, *legacy_keys])
+        raise KeyError(f"Missing required config key. Tried: {searched}")
+    return default
+
 def get_training_pd_gains(joint_names):
     kp = np.array([_resolve_pd(n, "stiffness") for n in joint_names], dtype=np.float32)
     kd = np.array([_resolve_pd(n, "damping") for n in joint_names], dtype=np.float32)
@@ -152,6 +167,50 @@ def get_projected_gravity(mj_model, mj_data, body_name="pelvis"):
         raise ValueError(f"Body '{body_name}' not found")
     rot = mj_data.xmat[body_id].reshape(3, 3)
     return (rot.T @ np.array([0.0, 0.0, -1.0], dtype=np.float64)).astype(np.float32)
+
+
+def _quat_conjugate(quat_wxyz):
+    qw, qx, qy, qz = quat_wxyz
+    return np.array([qw, -qx, -qy, -qz], dtype=np.float64)
+
+
+def _quat_mul(q1_wxyz, q2_wxyz):
+    w1, x1, y1, z1 = q1_wxyz
+    w2, x2, y2, z2 = q2_wxyz
+    return np.array(
+        [
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        ],
+        dtype=np.float64,
+    )
+
+
+def _rotmat_from_quat(quat_wxyz):
+    qw, qx, qy, qz = quat_wxyz
+    return np.array(
+        [
+            [1 - 2 * (qy * qy + qz * qz), 2 * (qx * qy - qz * qw), 2 * (qx * qz + qy * qw)],
+            [2 * (qx * qy + qz * qw), 1 - 2 * (qx * qx + qz * qz), 2 * (qy * qz - qx * qw)],
+            [2 * (qx * qz - qy * qw), 2 * (qy * qz + qx * qw), 1 - 2 * (qx * qx + qy * qy)],
+        ],
+        dtype=np.float64,
+    )
+
+
+def get_root_local_rot_tan_norm(mj_data):
+    """Match mdp.root_local_rot_tan_norm for policies that use the 6D root orientation term."""
+    root_quat = mj_data.qpos[3:7].astype(np.float64)
+    qw, qx, qy, qz = root_quat
+    yaw = np.arctan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz))
+    yaw_quat = np.array([np.cos(yaw / 2.0), 0.0, 0.0, np.sin(yaw / 2.0)], dtype=np.float64)
+    root_quat_local = _quat_mul(_quat_conjugate(yaw_quat), root_quat)
+    root_rotm_local = _rotmat_from_quat(root_quat_local)
+    tan_vec = root_rotm_local[:, 0]
+    norm_vec = root_rotm_local[:, 2]
+    return np.concatenate([tan_vec, norm_vec]).astype(np.float32)
 
 # =============================================================================
 # Height scanner (aligned with training RayCaster config)
@@ -261,41 +320,128 @@ class HeightScanner:
 
         return heights, hits_w
 
+
+def build_height_scan_xyz(hits_world, body_quat_wxyz, body_pos_w, norm_offset):
+    """Match mdp.height_scan_xyz by expressing ray hits in the torso yaw frame."""
+    if hits_world is None:
+        return None
+
+    relative_pos_w = hits_world.astype(np.float64) - body_pos_w.astype(np.float64)[None, :]
+    qw, qx, qy, qz = body_quat_wxyz.astype(np.float64)
+    yaw = np.arctan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz))
+    c, s = np.cos(yaw), np.sin(yaw)
+    rot_inv = np.array([[c, s, 0.0], [-s, c, 0.0], [0.0, 0.0, 1.0]], dtype=np.float64)
+    coords = relative_pos_w @ rot_inv.T
+    coords[:, 2] = -coords[:, 2] - norm_offset
+    coords = np.nan_to_num(coords, nan=0.0, posinf=1.0, neginf=-1.0)
+    return coords.reshape(-1).astype(np.float32)
+
+
+def infer_obs_layout(expected_obs_dim, configured_history_length, enable_height_scan):
+    """Infer the observation layout from the checkpoint's expected actor input size."""
+    known_layouts = {
+        217: {"single_frame_dim": 96, "history_length": 1, "height_scan_mode": "scalar121"},
+        495: {"single_frame_dim": 99, "history_length": 5, "height_scan_mode": None},
+        601: {"single_frame_dim": 96, "history_length": 5, "height_scan_mode": "scalar121"},
+        858: {"single_frame_dim": 99, "history_length": 5, "height_scan_mode": "xyz363"},
+    }
+    if expected_obs_dim in known_layouts:
+        return known_layouts[expected_obs_dim]
+
+    height_scan_mode = "scalar121" if enable_height_scan else None
+    height_scan_dim = 121 if height_scan_mode == "scalar121" else 0
+    if expected_obs_dim > height_scan_dim and (expected_obs_dim - height_scan_dim) % configured_history_length == 0:
+        return {
+            "single_frame_dim": (expected_obs_dim - height_scan_dim) // configured_history_length,
+            "history_length": configured_history_length,
+            "height_scan_mode": height_scan_mode,
+        }
+    return {
+        "single_frame_dim": 96,
+        "history_length": configured_history_length,
+        "height_scan_mode": height_scan_mode,
+    }
+
+
+def normalize_checkpoint_state_dict(checkpoint):
+    """Support actor_state_dict / model_state_dict / state_dict checkpoint formats."""
+    actor_state_dict = checkpoint.get("actor_state_dict")
+    if isinstance(actor_state_dict, dict):
+        mapped_state_dict = {}
+        for key, value in actor_state_dict.items():
+            if not isinstance(value, torch.Tensor):
+                continue
+            if key == "distribution.std_param":
+                mapped_state_dict["std"] = value
+            elif key.startswith("proprio_embedding."):
+                mapped_state_dict[f"actor_proprio_embedding.{key.split('.', 1)[1]}"] = value
+            elif key.startswith("mlp."):
+                mapped_state_dict[f"actor.{key.split('.', 1)[1]}"] = value
+            else:
+                mapped_state_dict[key] = value
+        return mapped_state_dict
+
+    state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict", checkpoint))
+    if isinstance(state_dict, dict):
+        return {key: value for key, value in state_dict.items() if isinstance(value, torch.Tensor)}
+
+    raise RuntimeError(
+        "Unsupported checkpoint format. Expected actor_state_dict, model_state_dict, or state_dict."
+    )
+
+
+def infer_actor_input_dim(state_dict):
+    """Infer actor input dim from common checkpoint key layouts."""
+    candidate_keys = [
+        "actor.0.weight",
+        "actor.1.weight",
+        "actor.mlp.0.weight",
+        "mlp.0.weight",
+    ]
+    for key in candidate_keys:
+        tensor = state_dict.get(key)
+        if isinstance(tensor, torch.Tensor) and tensor.ndim == 2:
+            return int(tensor.shape[1])
+
+    for key, value in state_dict.items():
+        if key.startswith("actor.") and key.endswith(".weight") and isinstance(value, torch.Tensor) and value.ndim == 2:
+            return int(value.shape[1])
+
+    raise KeyError("Could not infer actor input dim from checkpoint state_dict.")
+
 # =============================================================================
 # Observation builder (aligned with BaseEnv.compute_observations)
 # =============================================================================
 
-def build_actor_obs(ang_vel, projected_gravity, command, joint_pos, joint_vel,
+def build_actor_obs(ang_vel, orientation_obs, command, joint_pos, joint_vel,
                     last_action, default_joint_pos, num_actions,
                     ang_vel_scale, dof_pos_scale, dof_vel_scale, cmd_scale,
-                    height_scan, height_scan_scale, height_scan_norm_offset,
-                    actor_obs_history_length):
-    """
-    Build single-frame actor observation matching BaseEnv.
-
-    Single frame: ang_vel(3) + projected_gravity(3) + commands(3) + joint_pos_rel(N) + joint_vel(N) + last_action(N)
-    = 3+3+3+29+29+29 = 96
-    Then append height_scan (121).
-    If history > 1, stack frames (flattened).
-    """
-    num_single = 3 + 3 + 3 + num_actions * 3  # 96
+                    obs_history, height_scan_obs=None):
+    """Build actor observation matching the inferred checkpoint layout."""
+    num_single = obs_history.shape[1]
 
     joint_pos_rel = (joint_pos - default_joint_pos) * dof_pos_scale
 
     single = np.zeros(num_single, dtype=np.float32)
     single[0:3] = ang_vel * ang_vel_scale
-    single[3:6] = projected_gravity
-    single[6:9] = command * cmd_scale
-    single[9:9 + num_actions] = joint_pos_rel
-    single[9 + num_actions:9 + 2 * num_actions] = joint_vel * dof_vel_scale
-    single[9 + 2 * num_actions:9 + 3 * num_actions] = last_action
+    orient_dim = len(orientation_obs)
+    single[3:3 + orient_dim] = orientation_obs
+    cmd_start = 3 + orient_dim
+    single[cmd_start:cmd_start + 3] = command * cmd_scale
+    joint_start = cmd_start + 3
+    single[joint_start:joint_start + num_actions] = joint_pos_rel
+    vel_start = joint_start + num_actions
+    single[vel_start:vel_start + num_actions] = joint_vel * dof_vel_scale
+    action_start = vel_start + num_actions
+    single[action_start:action_start + num_actions] = last_action
 
-    # Append height_scan
-    if height_scan is not None:
-        hs = (height_scan - height_scan_norm_offset) * height_scan_scale
-        print(hs.reshape(-1, 11)) #if print_elevation else None
-        return np.concatenate([single, hs], dtype=np.float32)
-    return single
+    obs_history[:-1] = obs_history[1:]
+    obs_history[-1] = single
+    stacked = obs_history.reshape(-1)
+
+    if height_scan_obs is not None:
+        return np.concatenate([stacked, height_scan_obs], dtype=np.float32)
+    return stacked
 
 # =============================================================================
 # Policy wrapper
@@ -356,8 +502,8 @@ def gamepad_reader(joystick, cmd, cmd_lock, running, deadzone, cmd_gain):
 
 def main():
     parser = argparse.ArgumentParser(description="MuJoCo sim2sim for LeggedLab G1 policies")
-    parser.add_argument("--policy_path", type=str, required=True,
-                        help="Path to checkpoint .pt file")
+    parser.add_argument("--policy_path", type=str, default=DEFAULT_POLICY_PATH,
+                        help=f"Path to checkpoint .pt file (default: {DEFAULT_POLICY_PATH})")
     parser.add_argument("--config", type=str, default="g1_29dof.yaml",
                         help="Path to YAML config")
     parser.add_argument("--no_height_scan", action="store_true",
@@ -394,51 +540,62 @@ def main():
     clip_obs = float(cfg.get("clip_observations", 100.0))
     clip_act = float(cfg.get("clip_actions", 100.0))
 
-    actor_obs_history_length = int(cfg.get("actor_obs_history_length", 1))
+    actor_obs_history_length = int(
+        _cfg_get_compat(cfg, "actor_obs_history_length", ["policy_history_length"], default=1)
+    )
 
     enable_height_scan = cfg.get("enable_height_scan", True) and not args.no_height_scan
     hs_resolution = float(cfg.get("height_scan_resolution", 0.04))
     hs_size = tuple(cfg.get("height_scan_size", [0.4, 0.4]))
-    hs_offset = tuple(cfg.get("height_scan_offset", [0.20, 0.0, 20.0]))
-    hs_norm_offset = float(cfg.get("height_scan_norm_offset", 0.5))
+    hs_offset = tuple(
+        _cfg_get_compat(cfg, "height_scan_offset", ["height_scan_position_offset"], default=[0.20, 0.0, 20.0])
+    )
+    hs_norm_offset = float(
+        _cfg_get_compat(cfg, "height_scan_norm_offset", ["height_scan_height_offset"], default=0.5)
+    )
     hs_scale = 1.0  # obs_scales.height_scan = 1.0 in training
 
     use_training_pd = bool(cfg.get("use_training_pd", False))
     pd_scale = float(cfg.get("pd_scale", 1.0))
 
-    cmd_init = np.array(cfg["cmd_init"], dtype=np.float32)
+    cmd_init = np.array(
+        _cfg_get_compat(cfg, "cmd_init", ["command"], default=[0.0, 0.0, 0.0]),
+        dtype=np.float32,
+    )
     use_gamepad = bool(cfg.get("use_gamepad", False)) or args.gamepad
     gamepad_deadzone = float(cfg.get("gamepad_deadzone", 0.15))
-    gamepad_cmd_gain = np.array(cfg.get("gamepad_cmd_gain", [1.0, 0.6, 1.0]), dtype=np.float32)
+    gamepad_cmd_gain = np.array(
+        _cfg_get_compat(cfg, "gamepad_cmd_gain", ["gamepad_command_gains"], default=[1.0, 0.6, 1.0]),
+        dtype=np.float32,
+    )
     startup_blend_steps = int(cfg.get("startup_blend_steps", 30))
     startup_cmd_zero_steps = int(cfg.get("startup_cmd_zero_steps", 20))
     policy_delay_steps = int(cfg.get("policy_delay_steps", 0))
     print_elevation = bool(cfg.get("print_elevation_z", False)) or args.print_elevation
 
-    # ---- Derived dimensions ------------------------------------------------
+    # ---- Policy metadata / expected observation layout ---------------------
     policy_joint_order = cfg.get("policy_joint_order", POLICY_JOINT_ORDER)
-    num_single_frame = 3 + 3 + 3 + num_actions * 3  # 96
-    if enable_height_scan:
-        hs_nx = int(hs_size[0] / hs_resolution) + 1  # 11
-        hs_ny = int(hs_size[1] / hs_resolution) + 1  # 11
-        hs_dim = hs_nx * hs_ny  # 121
-        num_actor_obs = num_single_frame * actor_obs_history_length + hs_dim
+    checkpoint = torch.load(policy_path, map_location="cpu", weights_only=False)
+    state_dict = normalize_checkpoint_state_dict(checkpoint)
+    is_recurrent = any("memory_a" in k for k in state_dict.keys())
+    if is_recurrent:
+        expected_obs_dim = state_dict["memory_a.rnn.weight_ih_l0"].shape[1]
     else:
-        hs_dim = 0
-        num_actor_obs = num_single_frame * actor_obs_history_length
+        expected_obs_dim = infer_actor_input_dim(state_dict)
 
-    print("=" * 70)
-    print("LeggedLab MuJoCo Sim2Sim Deploy")
-    print("=" * 70)
-    print(f"  XML:          {xml_path}")
-    print(f"  Policy:       {policy_path}")
-    print(f"  Actions:      {num_actions}")
-    print(f"  Single-frame: {num_single_frame}")
-    print(f"  History:      {actor_obs_history_length}")
-    print(f"  Height scan:  {hs_dim} dims ({hs_nx}x{hs_ny})" if enable_height_scan else "  Height scan:  disabled")
-    print(f"  Actor obs:    {num_actor_obs}")
-    print(f"  Action scale: {action_scale}")
-    print("=" * 70)
+    obs_layout = infer_obs_layout(expected_obs_dim, actor_obs_history_length, enable_height_scan)
+    num_single_frame = obs_layout["single_frame_dim"]
+    actor_obs_history_length = obs_layout["history_length"]
+    height_scan_mode = obs_layout["height_scan_mode"]
+    height_scan_requested = height_scan_mode is not None
+    hs_nx = int(hs_size[0] / hs_resolution) + 1
+    hs_ny = int(hs_size[1] / hs_resolution) + 1
+    hs_dim = 0
+    if height_scan_mode == "scalar121":
+        hs_dim = hs_nx * hs_ny
+    elif height_scan_mode == "xyz363":
+        hs_dim = hs_nx * hs_ny * 3
+    num_actor_obs = expected_obs_dim
 
     # ---- Load MuJoCo model -------------------------------------------------
     mj_model = mujoco.MjModel.from_xml_path(xml_path)
@@ -469,9 +626,12 @@ def main():
         kps, kds = get_training_pd_gains(mujoco_joint_names)
         torque_limit = get_training_effort_limits(mujoco_joint_names)
     else:
-        kps = np.array(cfg["stiffness"], dtype=np.float32)
-        kds = np.array(cfg["damping"], dtype=np.float32)
-        torque_limit = np.array(cfg["torque_limit"], dtype=np.float32)
+        kps = np.array(_cfg_get_compat(cfg, "stiffness", [], required=True), dtype=np.float32)
+        kds = np.array(_cfg_get_compat(cfg, "damping", [], required=True), dtype=np.float32)
+        torque_limit = np.array(
+            _cfg_get_compat(cfg, "torque_limit", ["effort_limits"], required=True),
+            dtype=np.float32,
+        )
 
     if pd_scale != 1.0:
         kps *= pd_scale
@@ -483,7 +643,7 @@ def main():
 
     # ---- Height scanner -----------------------------------------------------
     scanner = None
-    if enable_height_scan:
+    if height_scan_requested and not args.no_height_scan:
         scanner = HeightScanner(
             resolution=hs_resolution, scan_size=hs_size,
             offset=hs_offset, body_name="torso_link")
@@ -508,20 +668,29 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
-    checkpoint = torch.load(policy_path, map_location=device, weights_only=False)
-    state_dict = checkpoint.get("model_state_dict", checkpoint.get("state_dict", checkpoint))
-
     # Detect policy type from state dict keys
-    is_recurrent = any("memory_a" in k for k in state_dict.keys())
     print(f"Policy type: {'ActorCriticRecurrent (LSTM)' if is_recurrent else 'ActorCritic (MLP)'}")
+    print("=" * 70)
+    print("LeggedLab MuJoCo Sim2Sim Deploy")
+    print("=" * 70)
+    print(f"  XML:          {xml_path}")
+    print(f"  Policy:       {policy_path}")
+    print(f"  Actions:      {num_actions}")
+    print(f"  Single-frame: {num_single_frame}")
+    print(f"  History:      {actor_obs_history_length}")
+    print(
+        f"  Height scan:  {hs_dim} dims ({hs_nx}x{hs_ny}) mode={height_scan_mode}"
+        if height_scan_requested else "  Height scan:  disabled"
+    )
+    print(f"  Actor obs:    {num_actor_obs}")
+    print(f"  Action scale: {action_scale}")
+    print("=" * 70)
 
     if is_recurrent:
         from rsl_rl.modules import ActorCriticRecurrent
 
         # Infer rnn_hidden_dim from state dict shape
         rnn_hidden_dim = state_dict["memory_a.rnn.weight_hh_l0"].shape[1]  # 256
-        # Infer actor MLP input dim from actor.0.weight
-        mlp_input = state_dict["actor.0.weight"].shape[1]  # rnn_hidden_dim = 256
 
         policy = ActorCriticRecurrent(
             num_actor_obs=num_actor_obs,
@@ -554,7 +723,11 @@ def main():
 
     # ---- Warmup -------------------------------------------------------------
     warm_obs = np.zeros(num_actor_obs, dtype=np.float32)
-    warm_obs[5] = -1.0  # gravity z ≈ -1
+    if num_single_frame == 96:
+        warm_obs[5] = -1.0  # gravity z ≈ -1
+    elif num_single_frame == 99:
+        warm_obs[3] = 1.0   # tan x
+        warm_obs[8] = 1.0   # norm z
     if is_recurrent:
         policy.reset()  # 只重置一次, 然后隐藏状态跨 warmup 步骤传递
     for _ in range(3):
@@ -591,7 +764,11 @@ def main():
 
     # ---- Observation history buffer (if history > 1) ------------------------
     obs_history = np.zeros((actor_obs_history_length, num_single_frame), dtype=np.float32)
-    obs_history[-1, 5] = -1.0  # init gravity
+    if num_single_frame == 96:
+        obs_history[-1, 5] = -1.0
+    elif num_single_frame == 99:
+        obs_history[-1, 3] = 1.0
+        obs_history[-1, 8] = 1.0
 
     # ---- Main loop ----------------------------------------------------------
     startup_step = 0
@@ -615,7 +792,10 @@ def main():
                 qj = mj_data.qpos[7:]
                 dqj = mj_data.qvel[6:]
                 omega = mj_data.qvel[3:6]
-                grav = get_projected_gravity(mj_model, mj_data)
+                if num_single_frame == 96:
+                    orientation_obs = get_projected_gravity(mj_model, mj_data)
+                else:
+                    orientation_obs = get_root_local_rot_tan_norm(mj_data)
 
                 # Reorder to policy order
                 qj_pol = np.zeros(num_actions, dtype=np.float32)
@@ -626,17 +806,34 @@ def main():
                         dqj_pol[pi] = dqj[mi]
 
                 # Height scan
+                hs_raw = None
+                hs_hits = None
                 if scanner is not None:
                     hs_raw, hs_hits = scanner.scan(mj_model, mj_data)
-                else:
-                    hs_raw = None
+
+                height_scan_obs = None
+                if height_scan_mode == "scalar121":
+                    if hs_raw is not None:
+                        height_scan_obs = (hs_raw - hs_norm_offset) * hs_scale
+                    else:
+                        height_scan_obs = np.zeros(hs_dim, dtype=np.float32)
+                elif height_scan_mode == "xyz363":
+                    if hs_hits is not None:
+                        torso_body_id = scanner._body_id if scanner is not None else mujoco.mj_name2id(
+                            mj_model, mujoco.mjtObj.mjOBJ_BODY, "torso_link"
+                        )
+                        body_quat = mj_data.xquat[torso_body_id].copy()
+                        body_pos = mj_data.xpos[torso_body_id].copy()
+                        height_scan_obs = build_height_scan_xyz(hs_hits, body_quat, body_pos, hs_norm_offset)
+                    else:
+                        height_scan_obs = np.zeros(hs_dim, dtype=np.float32)
 
                 # Build observation
                 obs = build_actor_obs(
-                    omega, grav, cur_cmd, qj_pol, dqj_pol, last_action,
+                    omega, orientation_obs, cur_cmd, qj_pol, dqj_pol, last_action,
                     default_joints_yaml, num_actions,
                     ang_vel_scale, dof_pos_scale, dof_vel_scale, cmd_scale,
-                    hs_raw, hs_scale, hs_norm_offset, actor_obs_history_length)
+                    obs_history, height_scan_obs)
 
                 # Clip observation
                 obs = np.clip(obs, -clip_obs, clip_obs)

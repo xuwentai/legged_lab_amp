@@ -346,7 +346,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         #   v_y (-0.5, 0.5): matches the side-step clips (p1/p99 ~ -0.48 / 0.53).
         #   w_z (-1.5, 1.5): covers the fast turn-around / 135deg clips (p1/p99 ~ -1.55 / 1.65).
         # The reset-aligned command in AmpVelocityCommand is clamped to these same ranges.
-        self.commands.base_velocity.ranges.lin_vel_x = (-0.3, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-0.6, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
         self.commands.base_velocity.ranges.ang_vel_z = (-1.5, 1.5)
         self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)
