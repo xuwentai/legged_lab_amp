@@ -37,6 +37,7 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
             "height_offset": 0.1,
             "align_xy_to_origin": False,
         }
+        self.commands.base_velocity.reset_standing_from_default = True
         # No terrain to perceive on flat ground: remove the height scanner, its policy/critic
         # observations, and the terrain-difficulty curriculum (mirrors the official flat cfg).
         self.scene.height_scanner = None
@@ -115,3 +116,4 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
         # env_origins.z == 0 and the reference motion's absolute xy is valid ground, so match the
         # non-play G1AmpFlatEnvCfg and keep the reference xy (DeepMimic-style reset).
         self.events.reset_from_ref.params["align_xy_to_origin"] = False
+        self.commands.base_velocity.reset_standing_from_default = True

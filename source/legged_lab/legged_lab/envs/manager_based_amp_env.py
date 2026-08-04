@@ -72,6 +72,19 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
 
         return None
 
+    def _export_amp_command(self) -> None:
+        """Expose the current velocity command to PPOAMP through extras.
+
+        Rewards are computed before the command manager advances/resamples commands for the next
+        observation, so this must be called before ``command_manager.compute`` in ``step``.
+        """
+        try:
+            command = self.command_manager.get_command("base_velocity")
+        except (KeyError, AttributeError):
+            self.extras.pop("amp_command", None)
+            return
+        self.extras["amp_command"] = command.detach().clone()
+
     def load_managers(self):
         """Load AMP-specific managers while swapping in the local preview observation manager.
 
@@ -198,6 +211,7 @@ class ManagerBasedAmpEnv(ManagerBasedAnimationEnv):
         self.reset_time_outs = self.termination_manager.time_outs
         # -- reward computation
         self.reward_buf = self.reward_manager.compute(dt=self.step_dt)
+        self._export_amp_command()
 
         if len(self.recorder_manager.active_terms) > 0:
             # update observations for recording if needed

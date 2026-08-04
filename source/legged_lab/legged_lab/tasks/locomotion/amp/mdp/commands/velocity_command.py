@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import torch
 
 import isaaclab.utils.math as math_utils
+from isaaclab.assets import Articulation
 from isaaclab.envs.mdp.commands.velocity_command import UniformVelocityCommand
 
 if TYPE_CHECKING:
@@ -69,7 +70,33 @@ class AmpVelocityCommand(UniformVelocityCommand):
 
         # reset resample: align to the reference-motion frame
         if reset_ids.numel() > 0:
-            self._align_to_reference(reset_ids)
+            if self.cfg.reset_standing_from_default:
+                super()._resample_command(reset_ids)
+                standing_ids = reset_ids[self.is_standing_env[reset_ids]]
+                moving_ids = reset_ids[~self.is_standing_env[reset_ids]]
+                if standing_ids.numel() > 0:
+                    self._reset_standing_envs_to_default(standing_ids)
+                if moving_ids.numel() > 0:
+                    self._align_to_reference(moving_ids)
+            else:
+                self._align_to_reference(reset_ids)
+
+    def _reset_standing_envs_to_default(self, env_ids: torch.Tensor):
+        robot: Articulation = self._env.scene[self.cfg.asset_name]
+
+        self.vel_command_b[env_ids] = 0.0
+        self.is_heading_env[env_ids] = False
+        self.is_standing_env[env_ids] = True
+
+        root_state = robot.data.default_root_state[env_ids].clone()
+        root_state[:, :3] += self._env.scene.env_origins[env_ids]
+        root_state[:, 7:13] = 0.0
+        robot.write_root_pose_to_sim(root_state[:, :7], env_ids=env_ids)
+        robot.write_root_velocity_to_sim(root_state[:, 7:13], env_ids=env_ids)
+
+        joint_pos = robot.data.default_joint_pos[env_ids].clone()
+        joint_vel = torch.zeros_like(robot.data.default_joint_vel[env_ids])
+        robot.write_joint_state_to_sim(joint_pos, joint_vel, env_ids=env_ids)
 
     def _align_to_reference(self, env_ids: torch.Tensor):
         animation_term: AnimationTerm = self._env.animation_manager.get_term(self.cfg.animation)

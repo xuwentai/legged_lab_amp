@@ -26,3 +26,6 @@ class AmpVelocityCommandCfg(UniformVelocityCommandCfg):
 
     reset_heading_lookahead: float = 0.5
     """Look-ahead time tau (s) used on reset: heading_target = wrap_to_pi(heading_w + ang_vel_z * tau)."""
+
+    reset_standing_from_default: bool = False
+    """If True, reset standing-command envs to the robot default state instead of a reference walking frame."""

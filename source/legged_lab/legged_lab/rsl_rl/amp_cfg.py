@@ -31,6 +31,15 @@ class RslRlAmpCfg:
     many PPO mini-batch steps. Values > 1 slow down the discriminator relative to the policy,
     helping prevent early saturation. Default 1 = update every mini-batch (original behaviour)."""
 
+    zero_command_style_threshold: float = 0.0
+    """If positive, treat commands with planar/yaw norm below this value as standing commands."""
+
+    zero_command_style_scale: float = 1.0
+    """Multiplier applied to AMP style reward for standing commands. Default 1 keeps original behaviour."""
+
+    command_name: str = "base_velocity"
+    """Command name exported by the environment for command-aware AMP reward shaping."""
+
     @configclass
     class AMPDiscriminatorCfg:
         """Configuration for the AMP discriminator network."""

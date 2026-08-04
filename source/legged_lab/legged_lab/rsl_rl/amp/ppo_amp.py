@@ -230,6 +230,14 @@ class PPOAMP(PPO):
         self.style_rewards, self.disc_score = self.amp_discriminator.predict_style_reward(
             disc_obs, dt=self.amp_cfg["step_dt"]
         )
+        zero_command_threshold = self.amp_cfg.get("zero_command_style_threshold", 0.0)
+        if zero_command_threshold > 0.0 and "amp_command" in extras:
+            command = extras["amp_command"].to(self.style_rewards.device)
+            command_norm = torch.linalg.norm(command[:, :3], dim=1)
+            zero_command_mask = command_norm < zero_command_threshold
+            if torch.any(zero_command_mask):
+                self.style_rewards = self.style_rewards.clone()
+                self.style_rewards[zero_command_mask] *= self.amp_cfg.get("zero_command_style_scale", 1.0)
         self.rewards_lerp = self.amp_discriminator.lerp_reward(
             task_reward=rewards, style_reward=self.style_rewards
         )

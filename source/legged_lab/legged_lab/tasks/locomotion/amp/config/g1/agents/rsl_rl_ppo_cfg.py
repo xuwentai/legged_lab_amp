@@ -112,4 +112,8 @@ class G1AmpFlatPPORunnerCfg(G1AmpRoughPPORunnerCfg):
         # flat keeps disc_update_interval=5: the discriminator does not over-saturate on flat
         # (success_rate converges to ~1.0), so no need to slow it. The rough base sets 10; revert
         # it here so flat behavior is unchanged.
-        self.algorithm.amp_cfg.disc_update_interval = 5
+        self.algorithm.amp_cfg.disc_update_interval = 8
+        self.algorithm.amp_cfg.amp_discriminator.task_style_lerp = 0.6
+        self.algorithm.amp_cfg.amp_discriminator.style_reward_scale = 1.5
+        self.algorithm.amp_cfg.zero_command_style_threshold = 0.08
+        self.algorithm.amp_cfg.zero_command_style_scale = 0.0
