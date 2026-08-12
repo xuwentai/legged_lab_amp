@@ -73,6 +73,7 @@ class G1AmpFlatEnvCfg(G1AmpRoughEnvCfg):
         # base_height reverts to absolute world-z on flat ground (the rough base pointed it at
         # the now-removed height_scanner). None => original root_height_below_minimum behavior.
         self.terminations.base_height.params["sensor_cfg"] = None
+        self.rewards.base_height.params["sensor_cfg"] = None
 
 
 @configclass
@@ -111,6 +112,7 @@ class G1AmpFlatEnvCfg_PLAY(G1AmpRoughEnvCfg_PLAY):
         self.events.register_virtual_obstacles = None
         self.curriculum.terrain_levels = None
         self.terminations.base_height.params["sensor_cfg"] = None
+        self.rewards.base_height.params["sensor_cfg"] = None
         # This PLAY variant derives from the rough PLAY chain (not G1AmpFlatEnvCfg), so it inherits
         # reset_from_ref with align_xy_to_origin=True (the rough default). On plane terrain
         # env_origins.z == 0 and the reference motion's absolute xy is valid ground, so match the

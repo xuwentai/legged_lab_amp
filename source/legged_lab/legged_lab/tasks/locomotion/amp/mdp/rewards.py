@@ -8,6 +8,7 @@ from isaaclab.envs import mdp
 from isaaclab.managers import SceneEntityCfg
 
 if TYPE_CHECKING:
+    from isaaclab.assets import Articulation
     from isaaclab.assets import RigidObject  # runtime class, guarded per v3 pattern
     from isaaclab.sensors import ContactSensor  # runtime class, guarded per v3 pattern
     from isaaclab.envs import ManagerBasedRLEnv
@@ -47,6 +48,39 @@ def stand_still_joint_deviation_l1(
     command = env.command_manager.get_command(command_name)
     # Penalize motion when command is nearly zero.
     return mdp.joint_deviation_l1(env, asset_cfg) * (torch.norm(command[:, :2], dim=1) < command_threshold)
+
+
+def stand_still(
+    env: ManagerBasedRLEnv, command_name: str = "base_velocity", asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    asset: Articulation = env.scene[asset_cfg.name]
+
+    reward = torch.sum(torch.abs(asset.data.joint_pos - asset.data.default_joint_pos), dim=1)
+    cmd_norm = torch.norm(env.command_manager.get_command(command_name), dim=1)
+    return reward * (cmd_norm < 0.1)
+
+
+def feet_contact_without_command(
+    env: ManagerBasedRLEnv,
+    sensor_cfg: SceneEntityCfg,
+    command_name: str = "base_velocity",
+    command_threshold: float = 0.1,
+) -> torch.Tensor:
+    """Reward both feet being in contact on every zero-command step."""
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    is_contact = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids] > 0.0
+    command_norm = torch.norm(env.command_manager.get_command(command_name), dim=1)
+    return torch.sum(is_contact, dim=1).float() * (command_norm < command_threshold)
+
+
+def link_orientation(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize non-flat link orientation using L2 squared kernel."""
+    # extract the used quantities (to enable type-hinting)
+    asset: RigidObject = env.scene[asset_cfg.name]
+    link_quat = asset.data.body_quat_w[:, asset_cfg.body_ids[0], :]
+    link_projected_gravity = math_utils.quat_apply_inverse(link_quat, asset.data.GRAVITY_VEC_W)
+
+    return torch.sum(torch.square(link_projected_gravity[:, :2]), dim=1)
 
 
 def _resolve_stair_terrain_masks(

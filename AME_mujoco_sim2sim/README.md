@@ -70,11 +70,18 @@ python AME_mujoco_sim2sim/deploy_mujoco_ame.py \
   --policy <policy-or-checkpoint> --command 0.5 0.0 0.0
 
 # Gamepad command
-python AME_mujoco_sim2sim/deploy_mujoco_ame.py \
-  --policy logs/rsl_rl/g1_amp_rough/2026-07-14_22-23-12/model_12400.pt --gamepad --dry-run
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-07-23_16-08-24/model_12800.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-07-24_15-28-39/model_20200.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-07-24_15-28-39/model_6600.pt --gamepad
+
+
+
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-07-31_18-29-09/model_49999.pt --gamepad
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-03_18-43-02/model_63000.pt --gamepad
-python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-03_18-39-06/model_22600.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-04_12-00-40/model_52000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-05_18-16-47/model_21000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-05_18-16-47/model_30000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-05_18-16-47/model_49999.pt --gamepad
 # Validate XML, observation dimension, JIT loading, and one inference
 python AME_mujoco_sim2sim/deploy_mujoco_ame.py \
   --policy <policy-or-checkpoint> --dry-run

@@ -54,7 +54,14 @@ class G1AmpRewards:
     )
 
     # -- penalties
-    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-1.0)
+    flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=-3.0)
+    base_height = RewTerm(func=mdp.base_height_l2, weight=-10.0, params={"target_height": 0.78})
+    # The waist sits between pelvis and torso_link, so torso_link directly captures a bent upper body.
+    pelvis_orientation_l2 = RewTerm(
+        func=mdp.link_orientation,
+        weight=-3.0,
+        params={"asset_cfg": SceneEntityCfg("robot", body_names="torso_link")},
+    )
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.2)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
     dof_torques_l2 = RewTerm(
@@ -75,18 +82,16 @@ class G1AmpRewards:
     )
 
     joint_deviation_hip = RewTerm(
-        func=mdp.stand_still_joint_deviation_l1,
+        func=mdp.joint_deviation_l1,
         weight=-0.1,
         params={
-            "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_hip_yaw_joint", ".*_hip_roll_joint"]),
         },
     )
     joint_deviation_arms = RewTerm(
-        func=mdp.stand_still_joint_deviation_l1,
+        func=mdp.joint_deviation_l1,
         weight=-0.05,
         params={
-            "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg(
                 "robot",
                 joint_names=[
@@ -98,11 +103,23 @@ class G1AmpRewards:
         },
     )
     joint_deviation_waist = RewTerm(
-        func=mdp.stand_still_joint_deviation_l1,
+        func=mdp.joint_deviation_l1,
         weight=-0.1,
         params={
-            "command_name": "base_velocity",
             "asset_cfg": SceneEntityCfg("robot", joint_names="waist_.*_joint"),
+        },
+    )
+    stand_still = RewTerm(
+        func=mdp.stand_still,
+        weight=-0.3,
+        params={"command_name": "base_velocity"},
+    )
+    feet_contact_without_command = RewTerm(
+        func=mdp.feet_contact_without_command,
+        weight=0.5,
+        params={
+            "command_name": "base_velocity",
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
         },
     )
 
@@ -302,6 +319,9 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
 
         # discriminator observations
         self.observations.disc.history_length = AMP_NUM_STEPS
+        self.observations.disc.key_body_pos_b.params = {
+            "asset_cfg": SceneEntityCfg(name="robot", body_names=KEY_BODY_NAMES, preserve_order=True)
+        }
 
         # discriminator demonstration observations
         # ref_root_local_rot_tan_norm removed from disc_demo (paired with the disc-side
@@ -309,6 +329,10 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         self.observations.disc_demo.ref_root_ang_vel_b.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_pos.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_vel.params["animation"] = ANIMATION_TERM_NAME
+        self.observations.disc_demo.ref_key_body_pos_b.params = {
+            "animation": ANIMATION_TERM_NAME,
+            "flatten_steps_dim": False,
+        }
 
         # ------------------------------------------------------
         # Events
@@ -359,6 +383,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # which misfires as the generator ground rises). This measures how far the base sank
         # relative to the terrain underneath it.
         self.terminations.base_height.params["sensor_cfg"] = SceneEntityCfg("height_scanner")
+        self.rewards.base_height.params["sensor_cfg"] = SceneEntityCfg("height_scanner")
         # Fall-recovery fallback: terminate on torso/pelvis contact (matches the official G1
         # velocity rough config, which uses illegal_contact on torso_link). These links carry
         # large collision meshes high on the body, so normal gait never touches them — only a
