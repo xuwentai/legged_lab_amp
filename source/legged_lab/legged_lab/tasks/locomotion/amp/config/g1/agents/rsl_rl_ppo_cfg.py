@@ -2,7 +2,11 @@ from isaaclab.utils.configclass import configclass
 from isaaclab_rl.rsl_rl import RslRlMLPModelCfg, RslRlOnPolicyRunnerCfg, RslRlSymmetryCfg
 
 from legged_lab.rsl_rl import RslRlAMEEncoderModelCfg, RslRlAmpCfg, RslRlPpoAmpAlgorithmCfg
-from legged_lab.tasks.locomotion.amp.ame_cfg import G1_AME_MAP_SCAN_DIM, G1_AME_MAP_SCAN_HISTORY_LENGTH
+from legged_lab.tasks.locomotion.amp.ame_cfg import (
+    G1_AME_MAP_SCAN_DIM,
+    G1_AME_MAP_SCAN_HISTORY_LENGTH,
+    G1_ROUGH_USE_AME_ENCODER,
+)
 from legged_lab.tasks.locomotion.amp.mdp.symmetry import g1
 
 
@@ -25,30 +29,44 @@ class G1AmpRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         "discriminator_demonstration": ["disc_demo"],
     }
 
-    # Reference AME setup: CNN terrain features and proprioceptive cross-attention.
-    actor = RslRlAMEEncoderModelCfg(
-        hidden_dims=[512, 256, 128],
-        activation="elu",
-        obs_normalization=False,
-        distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
-        map_scan_dim=G1_AME_MAP_SCAN_DIM,
-        map_scan_history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
-        mha_dim=64,
-        num_heads=16,
-        cnn_downsample=False,
-        attach_global=False,
-    )
-    critic = RslRlAMEEncoderModelCfg(
-        hidden_dims=[512, 256, 128],
-        activation="elu",
-        obs_normalization=False,
-        map_scan_dim=G1_AME_MAP_SCAN_DIM,
-        map_scan_history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
-        mha_dim=64,
-        num_heads=16,
-        cnn_downsample=False,
-        attach_global=False,
-    )
+    # Select AME terrain attention or a plain MLP from amecfg.py. Both networks receive
+    # the same flattened policy/critic observations, including the selected terrain map.
+    if G1_ROUGH_USE_AME_ENCODER:
+        actor = RslRlAMEEncoderModelCfg(
+            hidden_dims=[512, 256, 128],
+            activation="elu",
+            obs_normalization=False,
+            distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
+            map_scan_dim=G1_AME_MAP_SCAN_DIM,
+            map_scan_history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
+            mha_dim=64,
+            num_heads=16,
+            cnn_downsample=False,
+            attach_global=False,
+        )
+        critic = RslRlAMEEncoderModelCfg(
+            hidden_dims=[512, 256, 128],
+            activation="elu",
+            obs_normalization=False,
+            map_scan_dim=G1_AME_MAP_SCAN_DIM,
+            map_scan_history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
+            mha_dim=64,
+            num_heads=16,
+            cnn_downsample=False,
+            attach_global=False,
+        )
+    else:
+        actor = RslRlMLPModelCfg(
+            hidden_dims=[512, 256, 128],
+            activation="elu",
+            obs_normalization=False,
+            distribution_cfg=RslRlMLPModelCfg.GaussianDistributionCfg(init_std=1.0),
+        )
+        critic = RslRlMLPModelCfg(
+            hidden_dims=[512, 256, 128],
+            activation="elu",
+            obs_normalization=False,
+        )
 
     algorithm = RslRlPpoAmpAlgorithmCfg(
         # Resolved by resolve_callable → legged_lab.rsl_rl.amp.ppo_amp.PPOAMP

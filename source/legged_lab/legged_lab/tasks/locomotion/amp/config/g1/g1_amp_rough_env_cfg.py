@@ -21,6 +21,7 @@ from legged_lab.assets.unitree import UNITREE_G1_29DOF_CFG
 from legged_lab.tasks.locomotion.amp.ame_cfg import (
     G1_AME_HEIGHT_OFFSET,
     G1_AME_MAP_SCAN_HISTORY_LENGTH,
+    G1_ROUGH_HEIGHT_SCAN_MODE,
     G1_AME_SCAN_POSITION_OFFSET,
     G1_AME_SCAN_RESOLUTION,
     G1_AME_SCAN_SIZE,
@@ -285,10 +286,11 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             ),
             debug_vis=True,
         )
-        # The xyz map goes into policy + critic only. A 0.5 m vertical bias matches the
-        # reference AME normalization; the discriminator never receives terrain data.
+        # The terrain map goes into policy + critic only; the discriminator never receives
+        # terrain data. Its representation is selected in amecfg.py for both groups.
+        height_scan_func = mdp.height_scan_xyz if G1_ROUGH_HEIGHT_SCAN_MODE == "xyz" else mdp.height_scan
         self.observations.policy.height_scan = ObsTerm(
-            func=mdp.height_scan_xyz,
+            func=height_scan_func,
             params={"sensor_cfg": SceneEntityCfg("height_scanner"), "offset": G1_AME_HEIGHT_OFFSET},
             noise=Unoise(n_min=-0.03, n_max=0.03),
             clip=(-1.0, 1.0),
@@ -296,7 +298,7 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             flatten_history_dim=True,
         )
         self.observations.critic.height_scan = ObsTerm(
-            func=mdp.height_scan_xyz,
+            func=height_scan_func,
             params={"sensor_cfg": SceneEntityCfg("height_scanner"), "offset": G1_AME_HEIGHT_OFFSET},
             clip=(-1.0, 1.0),
             history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,

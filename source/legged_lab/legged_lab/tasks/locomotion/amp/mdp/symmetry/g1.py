@@ -136,8 +136,9 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
         start_idx = end_idx
         end_idx = start_idx + LAST_ACTIONS_DIM
         obs[:, start_idx:end_idx] = _switch_g1_29dof_joints_left_right(obs[:, start_idx:end_idx])
-    # Mirror the grid along y and negate the local y coordinate channel. Flat tasks
-    # have no height_scan term and skip this block.
+    # Mirror the grid along y. XYZ maps also negate their local y-coordinate channel,
+    # while z-only maps contain no lateral coordinate to negate. Flat tasks have no
+    # height_scan term and skip this block.
     if "height_scan" in env.observation_manager.active_terms["policy"]:
         start_idx = end_idx
         scan_dim = HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS * HEIGHT_SCAN_COORD_DIM
@@ -146,7 +147,8 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
             -1, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COLS, HEIGHT_SCAN_COORD_DIM
         )
         mirrored_height_scan = height_scan.flip(dims=[1])
-        mirrored_height_scan[..., 1] = -mirrored_height_scan[..., 1]
+        if HEIGHT_SCAN_COORD_DIM == 3:
+            mirrored_height_scan[..., 1] = -mirrored_height_scan[..., 1]
         obs[:, start_idx:end_idx] = mirrored_height_scan.reshape(-1, scan_dim)
 
     return obs

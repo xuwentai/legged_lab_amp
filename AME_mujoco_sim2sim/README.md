@@ -89,6 +89,7 @@ python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_f
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-13_14-49-51/model_10000.pt --gamepad
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-13_14-49-51/model_15000.pt --gamepad
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-13_14-49-51/model_23000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-14_12-15-56/model_6600.pt --gamepad
 # Validate XML, observation dimension, JIT loading, and one inference
 python AME_mujoco_sim2sim/deploy_mujoco_ame.py \
   --policy <policy-or-checkpoint> --dry-run

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Run the current LeggedLab G1 AMP flat-terrain policy in MuJoCo.
+"""Run the current LeggedLab G1 AMP rough-terrain policy in MuJoCo.
 
-The policy input mirrors ``LeggedLab-Isaac-AMP-Flat-G1-Play-v0``:
+The policy input mirrors ``LeggedLab-Isaac-AMP-Rough-G1-Play-v0``:
 
     base_ang_vel history      5 x 3
     root rotation history     5 x 6
@@ -9,8 +9,10 @@ The policy input mirrors ``LeggedLab-Isaac-AMP-Flat-G1-Play-v0``:
     joint position history    5 x 29
     joint velocity history    5 x 29
     previous action history   5 x 29
+    terrain height map        1 x 11 x 11
+
 The ``--policy`` argument accepts either the TorchScript actor exported by
-``scripts/rsl_rl/play.py`` or a training checkpoint such as ``model_49999.pt``.
+``scripts/rsl_rl/play.py`` or a training checkpoint such as ``model_20200.pt``.
 """
 
 from __future__ import annotations
@@ -30,7 +32,6 @@ import yaml
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_POLICY_PATH = "../logs/rsl_rl/g1_amp_flat/2026-07-31_18-29-09/model_49999.pt"
 
 
 def _resolve_path(path: str | Path, base_dir: Path) -> Path:
@@ -60,21 +61,6 @@ def _rotation_about_z(yaw: float) -> np.ndarray:
         [[cosine, -sine, 0.0], [sine, cosine, 0.0], [0.0, 0.0, 1.0]],
         dtype=np.float64,
     )
-
-
-def foot_lateral_distance(
-    data: mujoco.MjData,
-    pelvis_body_id: int,
-    left_foot_body_id: int,
-    right_foot_body_id: int,
-) -> float:
-    """Return ankle-roll-link separation along the pelvis-heading y-axis."""
-    pelvis_rotation_wb = data.xmat[pelvis_body_id].reshape(3, 3)
-    pelvis_yaw = float(np.arctan2(pelvis_rotation_wb[1, 0], pelvis_rotation_wb[0, 0]))
-    heading_rotation = _rotation_about_z(pelvis_yaw)
-    left_foot_pos_b = heading_rotation.T @ (data.xpos[left_foot_body_id] - data.xpos[pelvis_body_id])
-    right_foot_pos_b = heading_rotation.T @ (data.xpos[right_foot_body_id] - data.xpos[pelvis_body_id])
-    return float(abs(left_foot_pos_b[1] - right_foot_pos_b[1]))
 
 
 def root_local_rot_tan_norm(data: mujoco.MjData, body_id: int) -> np.ndarray:
@@ -202,7 +188,7 @@ class TerrainScanner:
 
     @property
     def observation_size(self) -> int:
-        return self.num_x * self.num_y * 3
+        return self.num_x * self.num_y
 
     def scan(self, model: mujoco.MjModel, data: mujoco.MjData) -> np.ndarray:
         body_position = data.xpos[self.body_id].copy()
@@ -214,7 +200,7 @@ class TerrainScanner:
         ray_z = float(body_position[2] + offset_z)
         ray_direction = np.asarray([0.0, 0.0, -1.0], dtype=np.float64)
         geom_id = np.full(1, -1, dtype=np.int32)
-        observation = np.zeros((self.num_y, self.num_x, 3), dtype=np.float32)
+        observation = np.zeros((self.num_y, self.num_x), dtype=np.float32)
         world_hits = np.full((self.num_y, self.num_x, 3), np.nan, dtype=np.float64)
 
         # Isaac Lab GridPatternCfg(ordering="xy") flattens x fastest and y slowest.
@@ -251,11 +237,10 @@ class TerrainScanner:
 
                 relative_world = hit_position - body_position
                 relative_yaw = yaw_rotation.T @ relative_world
-                relative_yaw[2] = -relative_yaw[2] - self.height_offset
-                observation[y_index, x_index] = relative_yaw.astype(np.float32)
+                observation[y_index, x_index] = -relative_yaw[2] - self.height_offset
                 world_hits[y_index, x_index] = hit_position
 
-        # This is the same protection and per-term clip used by height_scan_xyz.
+        # Match Isaac Lab's scalar height_scan protection and per-term clipping.
         observation = np.nan_to_num(observation, nan=0.0, posinf=1.0, neginf=-1.0)
         observation = np.clip(observation, -1.0, 1.0)
         self.world_hits = world_hits.reshape(-1, 3)
@@ -274,12 +259,15 @@ class PolicyObservation:
         "actions": 29,
     }
 
-    def __init__(self, history_length: int) -> None:
+    def __init__(self, history_length: int, height_scan_history_length: int) -> None:
         self.history_length = history_length
+        self.height_scan_history_length = height_scan_history_length
         self.term_history: dict[str, deque[np.ndarray]] = {}
+        self.height_scan_history: deque[np.ndarray] = deque(maxlen=height_scan_history_length)
 
     def reset(self) -> None:
         self.term_history.clear()
+        self.height_scan_history.clear()
 
     @staticmethod
     def _append_or_fill(history: deque[np.ndarray], value: np.ndarray) -> None:
@@ -298,6 +286,7 @@ class PolicyObservation:
         joint_pos: np.ndarray,
         joint_vel: np.ndarray,
         last_action: np.ndarray,
+        height_scan: np.ndarray,
     ) -> np.ndarray:
         current_terms = {
             "base_ang_vel": base_ang_vel,
@@ -315,6 +304,8 @@ class PolicyObservation:
             self._append_or_fill(history, value)
             observation_parts.append(np.concatenate(tuple(history)))
 
+        self._append_or_fill(self.height_scan_history, np.asarray(height_scan, dtype=np.float32))
+        observation_parts.append(np.concatenate(tuple(self.height_scan_history)))
         observation = np.concatenate(observation_parts).astype(np.float32, copy=False)
         if not np.isfinite(observation).all():
             raise FloatingPointError("Non-finite value found in the MuJoCo policy observation.")
@@ -356,7 +347,7 @@ class JitPolicy:
 
 
 class TrainingCheckpointPolicy:
-    """Load an AME training checkpoint and expose the same inference API as JitPolicy."""
+    """Load a plain MLP training checkpoint and expose the JitPolicy inference API."""
 
     def __init__(
         self,
@@ -392,7 +383,7 @@ class TrainingCheckpointPolicy:
             activation="elu",
         ).to(device)
 
-        state_dict = self._checkpoint_to_actor_critic_encoder_state_dict(checkpoint)
+        state_dict = self._checkpoint_to_actor_critic_state_dict(checkpoint)
         loaded = self.module.load_state_dict(state_dict, strict=False)
         if loaded is False:
             raise RuntimeError(f"Unable to load actor weights from training checkpoint: {checkpoint_path}")
@@ -409,7 +400,7 @@ class TrainingCheckpointPolicy:
         return fallback
 
     @staticmethod
-    def _checkpoint_to_actor_critic_encoder_state_dict(checkpoint: dict[str, Any]) -> dict[str, torch.Tensor]:
+    def _checkpoint_to_actor_critic_state_dict(checkpoint: dict[str, Any]) -> dict[str, torch.Tensor]:
         actor_state_dict = checkpoint.get("actor_state_dict")
         if isinstance(actor_state_dict, dict):
             mapped_state_dict: dict[str, torch.Tensor] = {}
@@ -418,6 +409,8 @@ class TrainingCheckpointPolicy:
                     continue
                 if key == "distribution.std_param":
                     mapped_state_dict["std"] = value
+                elif key.startswith("proprio_embedding."):
+                    mapped_state_dict[f"actor_proprio_embedding.{key.split('.', 1)[1]}"] = value
                 elif key.startswith("mlp."):
                     mapped_state_dict[f"actor.{key.split('.', 1)[1]}"] = value
                 else:
@@ -516,13 +509,28 @@ def _run_gamepad(
         time.sleep(0.01)
 
 
+def _draw_scan_hits(viewer: Any, scanner: TerrainScanner) -> None:
+    valid_hits = scanner.world_hits[np.isfinite(scanner.world_hits).all(axis=1)]
+    num_geoms = min(len(valid_hits), viewer.user_scn.maxgeom)
+    viewer.user_scn.ngeom = num_geoms
+    for index in range(num_geoms):
+        mujoco.mjv_initGeom(
+            viewer.user_scn.geoms[index],
+            type=mujoco.mjtGeom.mjGEOM_SPHERE,
+            size=np.asarray([0.012, 0.0, 0.0], dtype=np.float64),
+            pos=valid_hits[index],
+            mat=np.eye(3, dtype=np.float64).reshape(-1),
+            rgba=np.asarray([0.1, 0.9, 0.2, 0.8], dtype=np.float32),
+        )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--policy",
         "--policy_path",
         dest="policy",
-        default=DEFAULT_POLICY_PATH,
+        required=True,
         help="Exported TorchScript policy.pt or an RSL-RL training checkpoint such as model_*.pt.",
     )
     parser.add_argument("--config", default="g1_29dof.yaml", help="Deployment YAML path.")
@@ -539,6 +547,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gamepad", action="store_true", help="Control the velocity command with a gamepad.")
     parser.add_argument("--headless", action="store_true", help="Run without the MuJoCo viewer.")
     parser.add_argument("--no-realtime", action="store_true", help="Do not pace the simulation to wall time.")
+    parser.add_argument("--hide-scan", action="store_true", help="Hide terrain-ray hit markers.")
+    parser.add_argument(
+        "--zero-height-scan",
+        action="store_true",
+        help="Feed a zero map while preserving the required policy dimension.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Load assets and run one policy inference, then exit.")
     return parser.parse_args()
 
@@ -556,6 +570,7 @@ def main() -> None:
 
     num_actions = int(config["num_actions"])
     history_length = int(config["policy_history_length"])
+    height_history_length = int(config["height_scan_history_length"])
     action_scale = float(config["action_scale"])
     action_clip = float(config["clip_actions"])
     sim_dt = float(config["simulation_dt"])
@@ -567,6 +582,10 @@ def main() -> None:
         raise ValueError(f"This G1 deployment expects 29 actions, got {num_actions}.")
     if history_length != 5:
         raise ValueError(f"The current policy configuration requires history length 5, got {history_length}.")
+    if height_history_length != 1:
+        raise ValueError(
+            f"The current terrain-map configuration requires history length 1, got {height_history_length}."
+        )
 
     joint_names = list(config["policy_joint_order"])
     if len(joint_names) != num_actions or len(set(joint_names)) != num_actions:
@@ -583,14 +602,30 @@ def main() -> None:
     pelvis_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
     if pelvis_id < 0:
         raise ValueError("MuJoCo body 'pelvis' was not found.")
-    left_foot_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "left_ankle_roll_link")
-    right_foot_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "right_ankle_roll_link")
-    if left_foot_id < 0 or right_foot_id < 0:
-        raise ValueError("MuJoCo bodies 'left_ankle_roll_link' and 'right_ankle_roll_link' are required.")
 
-    expected_obs_dim = history_length * sum(PolicyObservation.TERM_DIMS.values())
-    if expected_obs_dim != 495:
-        raise ValueError(f"The current G1 AMP flat actor requires 495 observations, got {expected_obs_dim}.")
+    scan_resolution = float(config["height_scan_resolution"])
+    scan_size = tuple(float(value) for value in config["height_scan_size"])
+    scan_position_offset = tuple(float(value) for value in config["height_scan_position_offset"])
+    scanner = TerrainScanner(
+        model=model,
+        body_name=str(config["height_scan_body"]),
+        resolution=scan_resolution,
+        scan_size=scan_size,
+        position_offset=scan_position_offset,
+        height_offset=float(config["height_scan_height_offset"]),
+    )
+    if (scanner.num_x, scanner.num_y) != (11, 11):
+        raise ValueError(
+            "The current rough MLP actor requires an 11x11 height map, "
+            f"but the deployment config produces {scanner.num_x}x{scanner.num_y}."
+        )
+
+    expected_obs_dim = (
+        history_length * sum(PolicyObservation.TERM_DIMS.values())
+        + height_history_length * scanner.observation_size
+    )
+    if expected_obs_dim != 616:
+        raise ValueError(f"The current G1 AMP rough MLP actor requires 616 observations, got {expected_obs_dim}.")
 
     device_name = args.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
     device = torch.device(device_name)
@@ -600,7 +635,7 @@ def main() -> None:
         expected_obs_dim,
         num_actions,
     )
-    observation_builder = PolicyObservation(history_length)
+    observation_builder = PolicyObservation(history_length, height_history_length)
 
     command = np.asarray(args.command if args.command is not None else config["command"], dtype=np.float32)
     gamepad_gains = _as_float_array(config["gamepad_command_gains"], 3, "gamepad_command_gains")
@@ -631,6 +666,12 @@ def main() -> None:
         return initial_action, initial_target
 
     last_action, target_joint_pos = reset_simulation()
+    height_scan_frequency = float(config["height_scan_frequency"])
+    if height_scan_frequency <= 0.0:
+        raise ValueError("height_scan_frequency must be positive.")
+    height_scan_period = 1.0 / height_scan_frequency
+    next_height_scan_time = float(data.time)
+    height_scan = np.zeros(scanner.observation_size, dtype=np.float32)
 
     action_ema_alpha = float(config.get("action_ema_alpha", 1.0))
     if not 0.0 < action_ema_alpha <= 1.0:
@@ -638,16 +679,25 @@ def main() -> None:
     smoothed_action = last_action.copy()
 
     print("=" * 72)
-    print("LeggedLab G1 AMP Flat -> MuJoCo sim2sim")
+    print("LeggedLab G1 AMP Rough -> MuJoCo sim2sim")
     print(f"  XML:             {xml_path}")
     print(f"  Policy:          {policy_path}")
     print(f"  Torch device:    {device}")
     print(f"  Control rate:    {1.0 / control_dt:.1f} Hz ({control_decimation} x {sim_dt:g} s)")
-    print(f"  Policy input:    {expected_obs_dim} = 495 proprio history")
+    print(f"  Policy input:    {expected_obs_dim} = 495 proprio history + 121 terrain heights")
+    print(f"  Terrain map:     {scanner.num_x} x {scanner.num_y} z @ {scan_resolution:.3f} m")
     print(f"  Command:         [{command[0]:.2f}, {command[1]:.2f}, {command[2]:.2f}]")
     print("=" * 72)
 
     def build_observation() -> np.ndarray:
+        nonlocal height_scan, next_height_scan_time
+        if args.zero_height_scan:
+            height_scan.fill(0.0)
+        elif data.time + 1.0e-9 >= next_height_scan_time:
+            height_scan = scanner.scan(model, data)
+            while next_height_scan_time <= data.time + 1.0e-9:
+                next_height_scan_time += height_scan_period
+
         with command_lock:
             current_command = command.copy()
         return observation_builder.build(
@@ -657,6 +707,7 @@ def main() -> None:
             joint_pos=joint_map.positions(data),
             joint_vel=joint_map.velocities(data),
             last_action=last_action,
+            height_scan=height_scan,
         )
 
     first_observation = build_observation()
@@ -699,11 +750,12 @@ def main() -> None:
 
     def run_iteration(viewer: Any | None) -> None:
         nonlocal policy_step, previous_sim_time, last_action, target_joint_pos
-        nonlocal smoothed_action
+        nonlocal smoothed_action, next_height_scan_time
 
         if data.time + 0.5 * sim_dt < previous_sim_time:
             last_action, target_joint_pos = reset_simulation()
             smoothed_action = last_action.copy()
+            next_height_scan_time = float(data.time)
             policy_step = 0
             if viewer is not None:
                 viewer.user_scn.ngeom = 0
@@ -714,7 +766,10 @@ def main() -> None:
             physics_step()
 
         if viewer is not None:
-            viewer.user_scn.ngeom = 0
+            if not args.hide_scan and not args.zero_height_scan:
+                _draw_scan_hits(viewer, scanner)
+            else:
+                viewer.user_scn.ngeom = 0
             previous_sim_time = float(data.time)
             viewer.sync()
         else:
@@ -723,12 +778,10 @@ def main() -> None:
         if policy_step % int(config["print_interval"]) == 0:
             with command_lock:
                 current_command = command.copy()
-            feet_distance_y = foot_lateral_distance(data, pelvis_id, left_foot_id, right_foot_id)
             print(
                 f"[step {policy_step:06d}] t={data.time:7.2f}s inference={inference_ms:6.2f}ms "
                 f"cmd=[{current_command[0]:+.2f},{current_command[1]:+.2f},{current_command[2]:+.2f}] "
-                f"action=[{last_action.min():+.2f},{last_action.max():+.2f}] "
-                f"feet_y={feet_distance_y:.3f}m"
+                f"action=[{last_action.min():+.2f},{last_action.max():+.2f}]"
             )
         policy_step += 1
 

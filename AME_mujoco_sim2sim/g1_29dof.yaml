@@ -10,6 +10,9 @@
 #   height_scan_xyz          1 x 11 x 11 x 3 = 363
 #   total                                      858
 
+#   height_scan              1 x 11 x 11 = 121
+#   total                                  616
+
 xml_path: unitree_model/G1/29dof/g1_29dof_rev_1_0.xml
 
 simulation_duration: 600.0
