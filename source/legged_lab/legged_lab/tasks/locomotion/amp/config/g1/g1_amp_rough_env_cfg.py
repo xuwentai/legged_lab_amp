@@ -97,16 +97,33 @@ class G1AmpRewards:
                 joint_names=[
                     ".*_shoulder_.*_joint",
                     ".*_elbow_joint",
-                    ".*_wrist_.*_joint",
+                    ".*_wrist_roll_joint",
+                    ".*_wrist_yaw_joint",
                 ],
             ),
+        },
+    )
+    joint_deviation_wrist_pitch = RewTerm(
+        func=mdp.joint_deviation_l1_tolerance,
+        weight=-0.05,
+        params={
+            "tolerance": 0.15,
+            "asset_cfg": SceneEntityCfg("robot", joint_names=".*_wrist_pitch_joint"),
         },
     )
     joint_deviation_waist = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-0.1,
         params={
-            "asset_cfg": SceneEntityCfg("robot", joint_names="waist_.*_joint"),
+            "asset_cfg": SceneEntityCfg("robot", joint_names=["waist_roll_joint", "waist_pitch_joint"]),
+        },
+    )
+    joint_deviation_waist_yaw = RewTerm(
+        func=mdp.joint_deviation_l1_tolerance,
+        weight=-0.1,
+        params={
+            "tolerance": 0.10,
+            "asset_cfg": SceneEntityCfg("robot", joint_names="waist_yaw_joint"),
         },
     )
     stand_still = RewTerm(
@@ -120,6 +137,27 @@ class G1AmpRewards:
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+        },
+    )
+    fly = RewTerm(
+        func=mdp.fly,
+        weight=-1.0,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_roll_link"),
+            "threshold": 1.0,
+        },
+    )
+    feet_close_xy = RewTerm(
+        func=mdp.feet_close_xy_gauss,
+        weight=0.4,
+        params={
+            "threshold": 0.14,
+            "asset_cfg": SceneEntityCfg(
+                "robot",
+                body_names=["left_ankle_roll_link", "right_ankle_roll_link"],
+                preserve_order=True,
+            ),
+            "std": math.sqrt(0.05),
         },
     )
 
@@ -319,9 +357,9 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
 
         # discriminator observations
         self.observations.disc.history_length = AMP_NUM_STEPS
-        self.observations.disc.key_body_pos_b.params = {
-            "asset_cfg": SceneEntityCfg(name="robot", body_names=KEY_BODY_NAMES, preserve_order=True)
-        }
+        # self.observations.disc.key_body_pos_b.params = {
+        #     "asset_cfg": SceneEntityCfg(name="robot", body_names=KEY_BODY_NAMES, preserve_order=True)
+        # }
 
         # discriminator demonstration observations
         # ref_root_local_rot_tan_norm removed from disc_demo (paired with the disc-side
@@ -329,10 +367,10 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         self.observations.disc_demo.ref_root_ang_vel_b.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_pos.params["animation"] = ANIMATION_TERM_NAME
         self.observations.disc_demo.ref_joint_vel.params["animation"] = ANIMATION_TERM_NAME
-        self.observations.disc_demo.ref_key_body_pos_b.params = {
-            "animation": ANIMATION_TERM_NAME,
-            "flatten_steps_dim": False,
-        }
+        # self.observations.disc_demo.ref_key_body_pos_b.params = {
+        #     "animation": ANIMATION_TERM_NAME,
+        #     "flatten_steps_dim": False,
+        # }
 
         # ------------------------------------------------------
         # Events

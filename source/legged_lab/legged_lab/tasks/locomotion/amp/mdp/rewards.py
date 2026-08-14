@@ -10,7 +10,7 @@ from isaaclab.managers import SceneEntityCfg
 if TYPE_CHECKING:
     from isaaclab.assets import Articulation
     from isaaclab.assets import RigidObject  # runtime class, guarded per v3 pattern
-    from isaaclab.sensors import ContactSensor  # runtime class, guarded per v3 pattern
+    from isaaclab.sensors import ContactSensor, RayCaster  # runtime classes, guarded per v3 pattern
     from isaaclab.envs import ManagerBasedRLEnv
 
 
@@ -30,8 +30,9 @@ def feet_orientation_l2(
     num_feet = len(sensor_cfg.body_ids)
 
     feet_quat = asset.data.body_quat_w[:, sensor_cfg.body_ids, :]  # shape: (N, M, 4)
+    gravity_vec_w = asset.data.GRAVITY_VEC_W.torch
     feet_proj_g = math_utils.quat_apply_inverse(
-        feet_quat, asset.data.GRAVITY_VEC_W.unsqueeze(1).expand(-1, num_feet, -1)  # shape: (N, M, 3)
+        feet_quat, gravity_vec_w.unsqueeze(1).expand(-1, num_feet, -1)  # shape: (N, M, 3)
     )
     feet_proj_g_xy_square = torch.sum(torch.square(feet_proj_g[:, :, :2]), dim=-1)  # shape: (N, M)
 
@@ -73,14 +74,77 @@ def feet_contact_without_command(
     return torch.sum(is_contact, dim=1).float() * (command_norm < command_threshold)
 
 
+def fly(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Return one when neither foot has a recent ground contact."""
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    net_contact_forces = contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :]
+    is_contact = torch.max(torch.norm(net_contact_forces, dim=-1), dim=1)[0] > threshold
+    return (~torch.any(is_contact, dim=-1)).float()
+
+
 def link_orientation(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize non-flat link orientation using L2 squared kernel."""
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
     link_quat = asset.data.body_quat_w[:, asset_cfg.body_ids[0], :]
-    link_projected_gravity = math_utils.quat_apply_inverse(link_quat, asset.data.GRAVITY_VEC_W)
+    gravity_vec_w = asset.data.GRAVITY_VEC_W.torch
+    link_projected_gravity = math_utils.quat_apply_inverse(link_quat, gravity_vec_w)
 
     return torch.sum(torch.square(link_projected_gravity[:, :2]), dim=1)
+
+
+def base_height_l2(
+    env: ManagerBasedRLEnv,
+    target_height: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    sensor_cfg: SceneEntityCfg | None = None,
+) -> torch.Tensor:
+    """Penalize base-height error relative to the terrain when a ray-caster is supplied."""
+    asset: RigidObject = env.scene[asset_cfg.name]
+    if sensor_cfg is None:
+        adjusted_target_height = target_height
+    else:
+        sensor: RayCaster = env.scene[sensor_cfg.name]
+        adjusted_target_height = target_height + torch.mean(sensor.data.ray_hits_w[..., 2], dim=1)
+    return torch.square(asset.data.root_pos_w[:, 2] - adjusted_target_height)
+
+
+def joint_deviation_l1(
+    env: ManagerBasedRLEnv,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize selected joints departing from their default position."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    error = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    return torch.sum(torch.abs(error), dim=1)
+
+
+def joint_deviation_l1_tolerance(
+    env: ManagerBasedRLEnv,
+    tolerance: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+) -> torch.Tensor:
+    """Penalize only the portion of a joint deviation outside a symmetric deadband."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    error = torch.abs(asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids])
+    return torch.sum(torch.clamp(error - tolerance, min=0.0), dim=1)
+
+
+def feet_close_xy_gauss(
+    env: ManagerBasedRLEnv,
+    threshold: float,
+    asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    std: float = 0.1,
+) -> torch.Tensor:
+    """Penalize feet whose lateral separation in the heading frame is below a threshold."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    feet_pos_xy = asset.data.body_pos_w[:, asset_cfg.body_ids, :2]
+    heading_w = asset.data.heading_w
+    cos_heading = torch.cos(heading_w)
+    sin_heading = torch.sin(heading_w)
+    feet_y_b = -sin_heading.unsqueeze(1) * feet_pos_xy[:, :, 0] + cos_heading.unsqueeze(1) * feet_pos_xy[:, :, 1]
+    feet_distance_y = torch.abs(feet_y_b[:, 0] - feet_y_b[:, 1])
+    return torch.exp(-torch.clamp(threshold - feet_distance_y, min=0.0) / std**2) - 1.0
 
 
 def _resolve_stair_terrain_masks(
