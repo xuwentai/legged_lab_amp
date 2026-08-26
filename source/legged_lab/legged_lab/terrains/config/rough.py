@@ -86,7 +86,7 @@ ROUGH_PERLIN_TERRAINS_CFG = TerrainGeneratorCfg(
     sub_terrains={
         # --- unchanged from official (clean mesh geometry, no foot-catching) ---
         "pyramid_stairs": terrain_gen.MeshPyramidStairsTerrainCfg(
-            proportion=0.2,
+            proportion=0.3,
             step_height_range=(0.05, 0.23),
             step_width=0.3,
             platform_width=3.0,
@@ -94,30 +94,33 @@ ROUGH_PERLIN_TERRAINS_CFG = TerrainGeneratorCfg(
             holes=False,
         ),
         "pyramid_stairs_inv": terrain_gen.MeshInvertedPyramidStairsTerrainCfg(
-            proportion=0.2,
+            proportion=0.3,
             step_height_range=(0.05, 0.23),
             step_width=0.3,
             platform_width=3.0,
             border_width=1.0,
             holes=False,
         ),
-        "boxes": terrain_gen.MeshRandomGridTerrainCfg(
-            proportion=0.2, grid_width=0.45, grid_height_range=(0.05, 0.2), platform_width=2.0
+        "flat": terrain_gen.MeshPlaneTerrainCfg(
+            proportion=0.6,
         ),
+        # "boxes": terrain_gen.MeshRandomGridTerrainCfg(
+        #     proportion=0.2, grid_width=0.45, grid_height_range=(0.05, 0.2), platform_width=2.0
+        # ),
         # --- random_rough: HfRandomUniform -> smooth Perlin plane (the fix) ---
         # noise_scale swept [0.0, 0.10] along the curriculum difficulty, matching the
         # official noise_range (0.02, 0.10) amplitude but as continuous fractal noise.
-        "random_rough": perlin_gen.PerlinPlaneTerrainCfg(
-            proportion=0.2,
-            noise_scale=[0.0, 0.10],
-            noise_frequency=20,
-            fractal_octaves=2,
-            fractal_lacunarity=2.0,
-            fractal_gain=0.25,
-            centering=True,
-            border_width=0.25,
-            **_NO_WALL,
-        ),
+        # "random_rough": perlin_gen.PerlinPlaneTerrainCfg(
+        #     proportion=0.2,
+        #     noise_scale=[0.0, 0.10],
+        #     noise_frequency=20,
+        #     fractal_octaves=2,
+        #     fractal_lacunarity=2.0,
+        #     fractal_gain=0.25,
+        #     centering=True,
+        #     border_width=0.25,
+        #     **_NO_WALL,
+        # ),
         # --- sloped tiles: Hf*PyramidSloped -> Perlin*PyramidSloped ---
         # slope_range / platform_width / border_width match the official values; a
         # light perlin_cfg overlay keeps the incline surface smooth.

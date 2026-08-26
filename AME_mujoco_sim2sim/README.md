@@ -71,8 +71,17 @@ python AME_mujoco_sim2sim/deploy_mujoco_ame.py \
 
 # Gamepad command
 python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-07-23_16-08-24/model_12800.pt --gamepad
-python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-07-24_15-28-39/model_20200.pt --gamepad
-python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-07-24_15-28-39/model_6600.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-26_15-24-39/model_31400.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_20800.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_31800.pt --gamepad
+python AME_mujoco_sim2sim/dep loy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_34000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_36600.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_41000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_45000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_50000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_55000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_60000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_ame.py --policy logs/rsl_rl/g1_amp_rough/2026-08-19_15-42-44/model_67800.pt --gamepad
 
 
 
@@ -90,6 +99,11 @@ python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_f
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-13_14-49-51/model_15000.pt --gamepad
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-13_14-49-51/model_23000.pt --gamepad
 python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-14_12-15-56/model_6600.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame.py  --policy logs/rsl_rl/g1_amp_flat/2026-08-14_12-15-56/model_54999.pt --gamepad
+
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame_rough.py  --policy  logs/rsl_rl/g1_amp_rough/2026-08-17_18-41-02/model_28000.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame_rough.py  --policy  logs/rsl_rl/g1_amp_rough/2026-08-18_09-42-52/model_29800.pt --gamepad
+python AME_mujoco_sim2sim/deploy_mujoco_no_ame_rough.py  --policy  logs/rsl_rl/g1_amp_rough/2026-08-18_18-00-32/model_9000.pt --gamepad
 # Validate XML, observation dimension, JIT loading, and one inference
 python AME_mujoco_sim2sim/deploy_mujoco_ame.py \
   --policy <policy-or-checkpoint> --dry-run

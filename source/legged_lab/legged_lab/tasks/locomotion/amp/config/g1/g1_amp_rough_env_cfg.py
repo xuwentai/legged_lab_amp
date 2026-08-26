@@ -6,9 +6,9 @@ from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.sensors import RayCasterCfg, patterns
+from isaaclab.sensors import RayCasterCameraCfg
+from isaaclab.sensors.ray_caster.patterns import PinholeCameraPatternCfg
 from isaaclab.utils.configclass import configclass
-from isaaclab.utils.noise import UniformNoiseCfg as Unoise
 
 import legged_lab.tasks.locomotion.amp.mdp as mdp
 from legged_lab import LEGGED_LAB_ROOT_DIR
@@ -19,12 +19,7 @@ from legged_lab.sensors.volume_points import Grid3dPointsGeneratorCfg, VolumePoi
 ##
 from legged_lab.assets.unitree import UNITREE_G1_29DOF_CFG
 from legged_lab.tasks.locomotion.amp.ame_cfg import (
-    G1_AME_HEIGHT_OFFSET,
     G1_AME_MAP_SCAN_HISTORY_LENGTH,
-    G1_ROUGH_HEIGHT_SCAN_MODE,
-    G1_AME_SCAN_POSITION_OFFSET,
-    G1_AME_SCAN_RESOLUTION,
-    G1_AME_SCAN_SIZE,
 )
 from legged_lab.tasks.locomotion.amp.amp_env_cfg import LocomotionAmpEnvCfg
 from legged_lab.terrains.config.rough import ROUGH_PERLIN_TERRAINS_CFG  # isort: skip
@@ -259,17 +254,31 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             )
 
         # ------------------------------------------------------
-        # Height scanner + height_scan observation (rough only)
+        # Depth camera + depth_image observation (rough only)
         # ------------------------------------------------------
-        # AME terrain map from the reference G1 setup: a 16x11 xyz grid covering
-        # [0.0, 0.6] m forward and [-0.2, 0.2] m laterally from the torso.
-        self.scene.height_scanner = RayCasterCfg(
+        # Match InstinctLab parkour: torso-mounted depth camera, 64x36 raw rays,
+        # cropped to 18x32 and stacked over four frames by the observation manager.
+        self.scene.height_scanner = None
+        self.scene.camera = RayCasterCameraCfg(
             prim_path="{ENV_REGEX_NS}/Robot/torso_link",
-            offset=RayCasterCfg.OffsetCfg(pos=G1_AME_SCAN_POSITION_OFFSET),
-            ray_alignment="yaw",
-            pattern_cfg=patterns.GridPatternCfg(resolution=G1_AME_SCAN_RESOLUTION, size=G1_AME_SCAN_SIZE),
+            offset=RayCasterCameraCfg.OffsetCfg(
+                pos=(0.07, 0.0, 0.06),
+                rot=(0.887, 0.0, 0.462, 0.0),
+                convention="world",
+            ),
+            pattern_cfg=PinholeCameraPatternCfg(
+                focal_length=1.0,
+                horizontal_aperture=2 * math.tan(math.radians(89.51) / 2),
+                vertical_aperture=2 * math.tan(math.radians(58.29) / 2),
+                width=64,
+                height=36,
+            ),
+            data_types=["distance_to_image_plane"],
+            depth_clipping_behavior="max",
+            max_distance=2.5,
+            mesh_prim_paths=["/World/ground/", "/World/envs/env_.*/Robot/(?!.*torso_link).*"],
+            update_period=0.02,
             debug_vis=True,
-            mesh_prim_paths=["/World/ground"],
         )
         self.scene.foot_volume_points = VolumePointsCfg(
             prim_path="{ENV_REGEX_NS}/Robot/.*_ankle_roll_link",
@@ -286,23 +295,38 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             ),
             debug_vis=True,
         )
-        # The terrain map goes into policy + critic only; the discriminator never receives
+        # The depth map goes into policy + critic only; the discriminator never receives
         # terrain data. Its representation is selected in amecfg.py for both groups.
-        height_scan_func = mdp.height_scan_xyz if G1_ROUGH_HEIGHT_SCAN_MODE == "xyz" else mdp.height_scan
-        self.observations.policy.height_scan = ObsTerm(
-            func=height_scan_func,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner"), "offset": G1_AME_HEIGHT_OFFSET},
-            noise=Unoise(n_min=-0.03, n_max=0.03),
+        self.observations.policy.height_scan = None
+        self.observations.critic.height_scan = None
+        self.observations.policy.depth_image = ObsTerm(
+            func=mdp.depth_image,
+            params={"sensor_cfg": SceneEntityCfg("camera")},
             clip=(-1.0, 1.0),
             history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
             flatten_history_dim=True,
         )
-        self.observations.critic.height_scan = ObsTerm(
-            func=height_scan_func,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner"), "offset": G1_AME_HEIGHT_OFFSET},
+        self.observations.critic.depth_image = ObsTerm(
+            func=mdp.depth_image,
+            params={"sensor_cfg": SceneEntityCfg("camera")},
             clip=(-1.0, 1.0),
             history_length=G1_AME_MAP_SCAN_HISTORY_LENGTH,
             flatten_history_dim=True,
+        )
+        self.events.randomize_camera_offset = EventTerm(
+            func=mdp.randomize_camera_offsets,
+            mode="startup",
+            params={
+                "asset_cfg": SceneEntityCfg("camera"),
+                "offset_pose_ranges": {
+                    "x": (-0.03, 0.03),
+                    "y": (-0.03, 0.03),
+                    "z": (-0.03, 0.03),
+                    "roll": (-math.radians(3.0), math.radians(3.0)),
+                    "pitch": (-math.radians(3.0), math.radians(3.0)),
+                    "yaw": (-math.radians(3.0), math.radians(3.0)),
+                },
+            },
         )
 
         # ------------------------------------------------------

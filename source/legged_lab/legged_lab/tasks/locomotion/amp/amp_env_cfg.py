@@ -14,7 +14,7 @@ from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
-from isaaclab.sensors import ContactSensorCfg, RayCasterCfg
+from isaaclab.sensors import ContactSensorCfg, RayCasterCameraCfg, RayCasterCfg
 from isaaclab.sim import SimulationCfg
 from isaaclab.utils.configclass import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
@@ -109,6 +109,7 @@ class AmpSceneCfg(InteractiveSceneCfg):
     # RayCasterCfg on generator terrain, and the flat config keeps it None. See
     # g1_amp_rough_env_cfg / g1_amp_flat_env_cfg.
     height_scanner: RayCasterCfg = None
+    camera: RayCasterCameraCfg = None
     foot_volume_points: VolumePointsCfg = None
     # lights
     sky_light = AssetBaseCfg(
@@ -521,6 +522,8 @@ class LocomotionAmpEnvCfg(ManagerBasedAmpEnvCfg):
             self.scene.contact_forces.update_period = self.sim.dt
         if getattr(self.scene, "height_scanner", None) is not None:
             self.scene.height_scanner.update_period = self.decimation * self.sim.dt
+        if getattr(self.scene, "camera", None) is not None:
+            self.scene.camera.update_period = self.decimation * self.sim.dt
         if getattr(self.scene, "foot_volume_points", None) is not None:
             self.scene.foot_volume_points.update_period = self.decimation * self.sim.dt
 

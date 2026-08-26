@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import torch
 from tensordict import TensorDict
 
-from legged_lab.tasks.locomotion.amp.ame_cfg import G1_AME_MAP_SCAN_DIM
+from legged_lab.tasks.locomotion.amp.ame_cfg import G1_AME_MAP_SCAN_DIM, G1_AME_MAP_SCAN_HISTORY_LENGTH
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -141,15 +141,23 @@ def _transform_policy_obs_left_right(env: ManagerBasedRLEnv, obs: torch.Tensor) 
     # height_scan term and skip this block.
     if "height_scan" in env.observation_manager.active_terms["policy"]:
         start_idx = end_idx
-        scan_dim = HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS * HEIGHT_SCAN_COORD_DIM
+        scan_dim = HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS * HEIGHT_SCAN_COORD_DIM * G1_AME_MAP_SCAN_HISTORY_LENGTH
         end_idx = start_idx + scan_dim
         height_scan = obs[:, start_idx:end_idx].view(
-            -1, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COLS, HEIGHT_SCAN_COORD_DIM
+            -1, G1_AME_MAP_SCAN_HISTORY_LENGTH, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COLS, HEIGHT_SCAN_COORD_DIM
         )
-        mirrored_height_scan = height_scan.flip(dims=[1])
+        mirrored_height_scan = height_scan.flip(dims=[2])
         if HEIGHT_SCAN_COORD_DIM == 3:
             mirrored_height_scan[..., 1] = -mirrored_height_scan[..., 1]
         obs[:, start_idx:end_idx] = mirrored_height_scan.reshape(-1, scan_dim)
+    elif "depth_image" in env.observation_manager.active_terms["policy"]:
+        start_idx = end_idx
+        scan_dim = HEIGHT_SCAN_ROWS * HEIGHT_SCAN_COLS * HEIGHT_SCAN_COORD_DIM * G1_AME_MAP_SCAN_HISTORY_LENGTH
+        end_idx = start_idx + scan_dim
+        depth_image = obs[:, start_idx:end_idx].view(
+            -1, G1_AME_MAP_SCAN_HISTORY_LENGTH, HEIGHT_SCAN_ROWS, HEIGHT_SCAN_COLS, HEIGHT_SCAN_COORD_DIM
+        )
+        obs[:, start_idx:end_idx] = depth_image.flip(dims=[3]).reshape(-1, scan_dim)
 
     return obs
 

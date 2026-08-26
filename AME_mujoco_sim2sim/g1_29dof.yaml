@@ -36,7 +36,7 @@ height_scan_frequency: 50.0
 initial_base_position: [0.0, 0.0, 0.8]
 command: [1.0, 0.0, 0.0]
 gamepad_deadzone: 0.15
-gamepad_command_gains: [0.7, 0.6, 1.0]
+gamepad_command_gains: [1.0, 0.6, 1.0]
 print_interval: 50
 
 # Isaac Lab articulation joint order. This must match the policy action and
