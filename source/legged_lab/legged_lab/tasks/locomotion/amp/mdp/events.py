@@ -56,4 +56,13 @@ def randomize_camera_offsets(
         sensor._offset_quat[env_ids] = offset_quat
         return
 
+    if hasattr(sensor, "_offset_pos_wp") and hasattr(sensor, "_offset_quat_wp"):
+        import warp as wp
+
+        offset_pos = wp.to_torch(sensor._offset_pos_wp)
+        offset_quat_t = wp.to_torch(sensor._offset_quat_wp)
+        offset_pos[env_ids] = base_pos + pos_noise
+        offset_quat_t[env_ids] = offset_quat
+        return
+
     raise AttributeError(f"Sensor '{asset_cfg.name}' does not expose mutable camera offsets.")
