@@ -1,5 +1,5 @@
 from isaaclab.sensors.ray_caster import RayCasterCfg
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 
 from .grouped_ray_caster import GroupedRayCaster
 
