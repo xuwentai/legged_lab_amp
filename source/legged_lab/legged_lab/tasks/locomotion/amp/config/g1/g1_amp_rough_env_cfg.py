@@ -6,8 +6,8 @@ from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.sensors import RayCasterCameraCfg
 from isaaclab.sensors.ray_caster.patterns import PinholeCameraPatternCfg
+from legged_lab.sensors.grouped_ray_caster import GroupedRayCasterCameraCfg
 from isaaclab.utils.configclass import configclass
 
 import legged_lab.tasks.locomotion.amp.mdp as mdp
@@ -259,9 +259,9 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
         # Match InstinctLab parkour: torso-mounted depth camera, 64x36 raw rays,
         # cropped to 18x32 and stacked over four frames by the observation manager.
         self.scene.height_scanner = None
-        self.scene.camera = RayCasterCameraCfg(
+        self.scene.camera = GroupedRayCasterCameraCfg(
             prim_path="{ENV_REGEX_NS}/Robot/torso_link",
-            offset=RayCasterCameraCfg.OffsetCfg(
+            offset=GroupedRayCasterCameraCfg.OffsetCfg(
                 pos=(0.07, 0.0, 0.06),
                 rot=(0.887, 0.0, 0.462, 0.0),
                 convention="world",
@@ -277,6 +277,15 @@ class G1AmpRoughEnvCfg(LocomotionAmpEnvCfg):
             depth_clipping_behavior="max",
             max_distance=2.5,
             mesh_prim_paths=["/World/ground/", "/World/envs/env_.*/Robot/(?!.*torso_link).*"],
+            aux_mesh_and_link_names={
+                "torso_link_rev_1_0": None,
+                "waist_yaw_link_rev_1_0": "waist_yaw_link",
+                "waist_roll_link_rev_1_0": "waist_roll_link",
+                "head_link": "head_link",
+                "left_rubber_hand": "left_rubber_hand",
+                "right_rubber_hand": "right_rubber_hand",
+            },
+            min_distance=0.1,
             update_period=0.02,
             debug_vis=True,
         )

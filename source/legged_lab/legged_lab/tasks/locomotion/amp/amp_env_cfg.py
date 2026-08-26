@@ -14,7 +14,7 @@ from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
-from isaaclab.sensors import ContactSensorCfg, RayCasterCameraCfg, RayCasterCfg
+from isaaclab.sensors import ContactSensorCfg, RayCasterCfg
 from isaaclab.sim import SimulationCfg
 from isaaclab.utils.configclass import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
@@ -25,6 +25,7 @@ from legged_lab.envs.manager_based_amp_env_cfg import ManagerBasedAmpEnvCfg
 from legged_lab.managers import AnimationTermCfg as AnimTerm
 from legged_lab.managers import MotionDataTermCfg as MotionDataTerm
 from legged_lab.sensors.volume_points import Grid3dPointsGeneratorCfg, VolumePointsCfg
+from legged_lab.sensors.grouped_ray_caster import GroupedRayCasterCameraCfg
 from legged_lab.terrains.terrain_importer_cfg import TerrainImporterCfg
 from legged_lab.terrains.virtual_obstacle import EdgeCylinderCfg
 from isaaclab_tasks.utils import PresetCfg
@@ -109,7 +110,7 @@ class AmpSceneCfg(InteractiveSceneCfg):
     # RayCasterCfg on generator terrain, and the flat config keeps it None. See
     # g1_amp_rough_env_cfg / g1_amp_flat_env_cfg.
     height_scanner: RayCasterCfg = None
-    camera: RayCasterCameraCfg = None
+    camera: GroupedRayCasterCameraCfg = None
     foot_volume_points: VolumePointsCfg = None
     # lights
     sky_light = AssetBaseCfg(
