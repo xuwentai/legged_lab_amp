@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, ClassVar, Literal
+import sys
 
 import isaaclab.utils.math as math_utils
 from isaaclab.markers import VisualizationMarkers
@@ -15,6 +16,8 @@ from .grouped_ray_caster import GroupedRayCaster
 if TYPE_CHECKING:
     from .grouped_ray_caster_camera_cfg import GroupedRayCasterCameraCfg
 
+sys.modules.setdefault("isaaclab.sensors.ray_caster.grouped_ray_caster_camera", sys.modules[__name__])
+
 
 def _isaacsim_camera_modules():
     import isaacsim.core.utils.stage as stage_utils
@@ -26,6 +29,10 @@ def _isaacsim_camera_modules():
 
 class GroupedRayCasterCamera(GroupedRayCaster):
     """Grouped ray-cast camera sensor."""
+
+    # Keep IsaacLab's factory registration happy while loading the class from
+    # legged_lab.
+    __module__ = "isaaclab.sensors.ray_caster.grouped_ray_caster_camera"
 
     cfg: GroupedRayCasterCameraCfg
 

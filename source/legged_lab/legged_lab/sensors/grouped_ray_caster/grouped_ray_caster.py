@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 import re
+import sys
 
 import isaaclab.sim as sim_utils
 import isaaclab.utils.math as math_utils
@@ -16,6 +17,8 @@ from legged_lab.utils.warp.raycast import raycast_mesh_grouped
 
 if TYPE_CHECKING:
     from .grouped_ray_caster_cfg import GroupedRayCasterCfg
+
+sys.modules.setdefault("isaaclab.sensors.ray_caster.grouped_ray_caster", sys.modules[__name__])
 
 
 def _isaacsim_modules():
@@ -34,6 +37,10 @@ class GroupedRayCaster(RayCaster):
     This lets a height scanner hit global terrain plus robot body meshes from
     its own environment, without seeing bodies from neighboring envs.
     """
+
+    # IsaacLab 3.x factory classes require sensor subclasses to be declared as
+    # part of the isaaclab package. The implementation still lives in legged_lab.
+    __module__ = "isaaclab.sensors.ray_caster.grouped_ray_caster"
 
     cfg: GroupedRayCasterCfg
 
